@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertFileSlot } from "@/components/alert-file-slot";
+import { AudioClipper } from "@/components/audio-clipper";
 import { TtsBar } from "@/components/tts-bar";
 import { Button, Card, Input, Label } from "@/components/ui";
 import { kopiykyToUah, uahToKopiyky } from "@/lib/money";
@@ -56,7 +57,7 @@ export function AlertTiersEditor({
     commit(tiers.filter((tier) => tier.id !== id));
   }
 
-  async function patchTier(id: string, patch: Partial<Pick<Tier, "minAmount" | "tts">>) {
+  async function patchTier(id: string, patch: Partial<Pick<Tier, "minAmount" | "tts" | "audioStart" | "audioEnd">>) {
     const next = tiers.map((tier) => (tier.id === id ? { ...tier, ...patch } : tier));
     commit(next);
     await fetch("/api/settings/alerts", {
@@ -142,7 +143,7 @@ export function AlertTiersEditor({
       ) : (
         <div className="space-y-3">
           {tiers.map((tier) => (
-            <div key={tier.id} className="grid gap-3 rounded-2xl border border-zinc-200 p-4 md:grid-cols-[140px_1fr_1fr_auto] md:items-end">
+            <div key={tier.id} className="grid gap-3 rounded-2xl border border-zinc-200 p-4 md:grid-cols-[140px_1fr_1fr_auto] md:items-start">
               <div>
                 <Label htmlFor={`min-${tier.id}`}>Від, ₴</Label>
                 <Input
@@ -191,6 +192,17 @@ export function AlertTiersEditor({
                   Прибрати
                 </Button>
               </div>
+              {tier.audioUrl ? (
+                <div className="md:col-span-4">
+                  <AudioClipper
+                    src={tier.audioUrl}
+                    start={tier.audioStart}
+                    end={tier.audioEnd}
+                    disabled={pending}
+                    onChange={(audioStart, audioEnd) => void patchTier(tier.id, { audioStart, audioEnd })}
+                  />
+                </div>
+              ) : null}
             </div>
           ))}
         </div>

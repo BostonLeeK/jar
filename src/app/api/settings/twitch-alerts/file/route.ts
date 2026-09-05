@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   const url = await saveAlertFile(user.id, id, kind, file);
   const updated = await prisma.twitchAlert.update({
     where: { id },
-    data: kind === "gif" ? { gifUrl: url } : { audioUrl: url },
+    data: kind === "gif" ? { gifUrl: url } : { audioUrl: url, audioStart: 0, audioEnd: 0 },
   });
   return NextResponse.json(toTwitchAlertConfig(updated));
 }
@@ -51,7 +51,7 @@ export async function DELETE(req: Request) {
   await removeAlertFile(user.id, id, kind);
   const updated = await prisma.twitchAlert.update({
     where: { id },
-    data: kind === "gif" ? { gifUrl: null } : { audioUrl: null },
+    data: kind === "gif" ? { gifUrl: null } : { audioUrl: null, audioStart: 0, audioEnd: 0 },
   });
   return NextResponse.json(toTwitchAlertConfig(updated));
 }

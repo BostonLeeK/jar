@@ -17,6 +17,8 @@ export type AlertTierConfig = {
   minAmount: number;
   gifUrl: string | null;
   audioUrl: string | null;
+  audioStart: number;
+  audioEnd: number;
   tts: boolean;
 };
 
@@ -25,8 +27,30 @@ export type TwitchAlertConfig = {
   kind: string;
   gifUrl: string | null;
   audioUrl: string | null;
+  audioStart: number;
+  audioEnd: number;
   tts: boolean;
 };
+
+export function toAlertTierConfig(item: {
+  id: string;
+  minAmount: number;
+  gifUrl: string | null;
+  audioUrl: string | null;
+  audioStart?: number;
+  audioEnd?: number;
+  tts: boolean;
+}): AlertTierConfig {
+  return {
+    id: item.id,
+    minAmount: item.minAmount,
+    gifUrl: item.gifUrl,
+    audioUrl: item.audioUrl,
+    audioStart: item.audioStart ?? 0,
+    audioEnd: item.audioEnd ?? 0,
+    tts: item.tts,
+  };
+}
 
 export function pickAlertTier(tiers: AlertTierConfig[], amount: number) {
   return [...tiers]

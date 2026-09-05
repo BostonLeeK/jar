@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertFileSlot } from "@/components/alert-file-slot";
+import { AudioClipper } from "@/components/audio-clipper";
 import { Card } from "@/components/ui";
 import type { TwitchAlertConfig } from "@/lib/overlay";
 import { TWITCH_ALERT_LABELS, isTwitchAlertKind } from "@/lib/twitch-alerts";
@@ -24,12 +25,12 @@ export function TwitchAlertsEditor({
     onChange(next);
   }
 
-  async function patchTts(id: string, tts: boolean) {
-    commit(alerts.map((item) => (item.id === id ? { ...item, tts } : item)));
+  async function patchAlert(id: string, patch: Partial<Pick<TwitchAlertConfig, "tts" | "audioStart" | "audioEnd">>) {
+    commit(alerts.map((item) => (item.id === id ? { ...item, ...patch } : item)));
     await fetch("/api/settings/twitch-alerts", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, tts }),
+      body: JSON.stringify({ id, ...patch }),
     });
   }
 
@@ -77,7 +78,7 @@ export function TwitchAlertsEditor({
       </div>
       <div className="space-y-3">
         {alerts.map((item) => (
-          <div key={item.id} className="grid gap-3 rounded-2xl border border-zinc-200 p-4 md:grid-cols-[140px_1fr_1fr_auto] md:items-end">
+          <div key={item.id} className="grid gap-3 rounded-2xl border border-zinc-200 p-4 md:grid-cols-[140px_1fr_1fr_auto] md:items-start">
             <p className="text-sm font-medium text-zinc-800">
               {isTwitchAlertKind(item.kind) ? TWITCH_ALERT_LABELS[item.kind] : item.kind}
             </p>
@@ -105,10 +106,21 @@ export function TwitchAlertsEditor({
               <input
                 type="checkbox"
                 checked={item.tts}
-                onChange={(event) => void patchTts(item.id, event.target.checked)}
+                onChange={(event) => void patchAlert(item.id, { tts: event.target.checked })}
               />
               TTS
             </label>
+            {item.audioUrl ? (
+              <div className="md:col-span-4">
+                <AudioClipper
+                  src={item.audioUrl}
+                  start={item.audioStart}
+                  end={item.audioEnd}
+                  disabled={pending}
+                  onChange={(audioStart, audioEnd) => void patchAlert(item.id, { audioStart, audioEnd })}
+                />
+              </div>
+            ) : null}
           </div>
         ))}
       </div>

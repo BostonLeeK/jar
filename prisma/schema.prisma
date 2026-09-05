@@ -102,10 +102,12 @@ model AlertTier {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   minAmount Int
-  gifUrl    String?
-  audioUrl  String?
-  tts       Boolean  @default(true)
-  createdAt DateTime @default(now())
+  gifUrl      String?
+  audioUrl    String?
+  audioStart  Float    @default(0)
+  audioEnd    Float    @default(0)
+  tts         Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   @@index([userId, minAmount])
 }
@@ -115,10 +117,12 @@ model TwitchAlert {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   kind      String
-  gifUrl    String?
-  audioUrl  String?
-  tts       Boolean  @default(true)
-  createdAt DateTime @default(now())
+  gifUrl     String?
+  audioUrl   String?
+  audioStart Float   @default(0)
+  audioEnd   Float   @default(0)
+  tts        Boolean @default(true)
+  createdAt  DateTime @default(now())
 
   @@unique([userId, kind])
 }

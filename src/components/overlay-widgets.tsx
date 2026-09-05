@@ -4,6 +4,7 @@ import { formatAlertDetail, type AlertKind } from "@/lib/alerts";
 import { CustomBlock } from "@/components/custom-markup";
 import { DEFAULT_ALERT_CSS, DEFAULT_ALERT_HTML, DEFAULT_GOAL_CSS, DEFAULT_GOAL_HTML, DEFAULT_RECENT_CSS, DEFAULT_RECENT_HTML } from "@/lib/custom-defaults";
 import { formatUah } from "@/lib/money";
+import { clipRange } from "@/lib/audio-clip";
 import { overlayPalette, pickAlertVisual, type AlertTierConfig, type TwitchAlertConfig } from "@/lib/overlay";
 import { escapeAttr, escapeHtml } from "@/lib/template";
 import { cn } from "@/lib/cn";
@@ -171,13 +172,40 @@ function waitUntilEnd(audio: HTMLAudioElement) {
   });
 }
 
-async function playUntilEnd(src: string, attach?: (audio: HTMLAudioElement) => void) {
+async function playUntilEnd(
+  src: string,
+  attach?: (audio: HTMLAudioElement) => void,
+  clip?: { start: number; end: number },
+) {
   const audio = new Audio(src);
   audio.preload = "auto";
   attach?.(audio);
   try {
+    await new Promise<void>((resolve, reject) => {
+      if (audio.readyState >= 1) {
+        resolve();
+        return;
+      }
+      audio.addEventListener("loadedmetadata", () => resolve(), { once: true });
+      audio.addEventListener("error", () => reject(new Error("audio")), { once: true });
+    });
+    const range = clipRange(clip, audio.duration || 0);
+    if (range.start > 0) {
+      audio.currentTime = range.start;
+    }
+    const stopAt = range.end > range.start ? range.end : 0;
+    const onTime = () => {
+      if (stopAt && audio.currentTime >= stopAt - 0.03) {
+        audio.pause();
+        audio.dispatchEvent(new Event("ended"));
+      }
+    };
+    if (stopAt) {
+      audio.addEventListener("timeupdate", onTime);
+    }
     await audio.play();
     await waitUntilEnd(audio);
+    audio.removeEventListener("timeupdate", onTime);
   } catch {
     return audio;
   }
@@ -244,9 +272,13 @@ export function useAlertEffects(donation: OverlayDonation | null, state: Overlay
 
     void (async () => {
       if (tier?.audioUrl) {
-        const sound = await playUntilEnd(tier.audioUrl, (item) => {
-          nodes.current.sound = item;
-        });
+        const sound = await playUntilEnd(
+          tier.audioUrl,
+          (item) => {
+            nodes.current.sound = item;
+          },
+          { start: tier.audioStart, end: tier.audioEnd },
+        );
         if (playingId.current !== alertId) {
           sound.pause();
           return;

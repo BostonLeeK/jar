@@ -1,4 +1,5 @@
 import { jsonError } from "@/lib/http";
+import { toAlertTierConfig } from "@/lib/overlay";
 import { prisma } from "@/lib/prisma";
 import { ensureTwitchAlerts, toTwitchAlertConfig } from "@/lib/twitch-alerts";
 import { NextResponse } from "next/server";
@@ -47,13 +48,7 @@ export async function GET(
     recentTitle: user.recentTitle,
     alertTts: user.alertTts,
     ttsLang: user.ttsLang,
-    alertTiers: user.alertTiers.map((tier) => ({
-      id: tier.id,
-      minAmount: tier.minAmount,
-      gifUrl: tier.gifUrl,
-      audioUrl: tier.audioUrl,
-      tts: tier.tts,
-    })),
+    alertTiers: user.alertTiers.map(toAlertTierConfig),
     twitchAlerts: twitchAlerts.map(toTwitchAlertConfig),
     alertUseCustom: user.alertUseCustom,
     alertCustomHtml: user.alertCustomHtml,

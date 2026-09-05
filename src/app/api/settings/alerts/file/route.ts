@@ -1,5 +1,6 @@
 import { isAllowedAlertFile, removeAlertFile, saveAlertFile } from "@/lib/alert-media";
 import { jsonError } from "@/lib/http";
+import { toAlertTierConfig } from "@/lib/overlay";
 import { prisma } from "@/lib/prisma";
 import { requireApiUser } from "@/lib/user";
 import { NextResponse } from "next/server";
@@ -27,9 +28,9 @@ export async function POST(req: Request) {
   const url = await saveAlertFile(user.id, tierId, kind, file);
   const updated = await prisma.alertTier.update({
     where: { id: tierId },
-    data: kind === "gif" ? { gifUrl: url } : { audioUrl: url },
+    data: kind === "gif" ? { gifUrl: url } : { audioUrl: url, audioStart: 0, audioEnd: 0 },
   });
-  return NextResponse.json(updated);
+  return NextResponse.json(toAlertTierConfig(updated));
 }
 
 export async function DELETE(req: Request) {
@@ -50,7 +51,7 @@ export async function DELETE(req: Request) {
   await removeAlertFile(user.id, id, kind);
   const updated = await prisma.alertTier.update({
     where: { id },
-    data: kind === "gif" ? { gifUrl: null } : { audioUrl: null },
+    data: kind === "gif" ? { gifUrl: null } : { audioUrl: null, audioStart: 0, audioEnd: 0 },
   });
-  return NextResponse.json(updated);
+  return NextResponse.json(toAlertTierConfig(updated));
 }

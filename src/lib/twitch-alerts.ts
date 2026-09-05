@@ -35,12 +35,22 @@ export async function ensureTwitchAlerts(userId: string) {
   return sortTwitchAlerts(await prisma.twitchAlert.findMany({ where: { userId } }));
 }
 
-export function toTwitchAlertConfig(item: { id: string; kind: string; gifUrl: string | null; audioUrl: string | null; tts: boolean }) {
+export function toTwitchAlertConfig(item: {
+  id: string;
+  kind: string;
+  gifUrl: string | null;
+  audioUrl: string | null;
+  audioStart?: number;
+  audioEnd?: number;
+  tts: boolean;
+}) {
   return {
     id: item.id,
     kind: item.kind,
     gifUrl: item.gifUrl,
     audioUrl: item.audioUrl,
+    audioStart: item.audioStart ?? 0,
+    audioEnd: item.audioEnd ?? 0,
     tts: item.tts,
   };
 }

@@ -1,5 +1,6 @@
 import { removeAlertFile } from "@/lib/alert-media";
 import { jsonError, readJson } from "@/lib/http";
+import { toAlertTierConfig } from "@/lib/overlay";
 import { isTtsLang } from "@/lib/tts";
 import { clamp } from "@/lib/validate";
 import { prisma } from "@/lib/prisma";
@@ -23,7 +24,7 @@ export async function POST() {
   const tier = await prisma.alertTier.create({
     data: { userId: user.id, minAmount },
   });
-  return NextResponse.json(tier);
+  return NextResponse.json(toAlertTierConfig(tier));
 }
 
 export async function PATCH(req: Request) {
@@ -34,7 +35,7 @@ export async function PATCH(req: Request) {
   const body = await readJson<{
     alertTts?: boolean;
     ttsLang?: string;
-    tiers?: Array<{ id: string; minAmount?: number; tts?: boolean }>;
+    tiers?: Array<{ id: string; minAmount?: number; tts?: boolean; audioStart?: number; audioEnd?: number }>;
   }>(req);
 
   if (typeof body.alertTts === "boolean" || (body.ttsLang && isTtsLang(body.ttsLang))) {
@@ -57,6 +58,8 @@ export async function PATCH(req: Request) {
               ? { minAmount: clamp(Math.round(tier.minAmount), 100, 100_000_000) }
               : {}),
             ...(typeof tier.tts === "boolean" ? { tts: tier.tts } : {}),
+            ...(typeof tier.audioStart === "number" ? { audioStart: clamp(tier.audioStart, 0, 3600) } : {}),
+            ...(typeof tier.audioEnd === "number" ? { audioEnd: clamp(tier.audioEnd, 0, 3600) } : {}),
           },
         }),
       ),
