@@ -4,6 +4,8 @@ import { emitDonation } from "@/lib/events";
 import type { MonoStatementItem } from "@/lib/mono";
 import { prisma } from "@/lib/prisma";
 
+const UNKNOWN_DONOR = "рак";
+
 function extractCode(value: string) {
   const match = value.toUpperCase().match(/\b[A-Z0-9]{4}\b/);
   return match?.[0] ?? "";
@@ -52,15 +54,7 @@ export async function ingestStatement(
         },
         orderBy: { createdAt: "asc" },
       })
-    : await prisma.pendingDonation.findFirst({
-        where: {
-          userId,
-          matched: false,
-          amount: item.amount,
-          expiresAt: { gt: now },
-        },
-        orderBy: { createdAt: "asc" },
-      });
+    : null;
 
   const donation = await prisma.$transaction(async (tx) => {
     if (pending) {
@@ -80,7 +74,7 @@ export async function ingestStatement(
         userId,
         monoTxId: item.id,
         amount: item.amount,
-        nickname: pending?.nickname || "Анонім",
+        nickname: pending?.nickname || UNKNOWN_DONOR,
         message: pending?.message || comment || "",
       },
     });
