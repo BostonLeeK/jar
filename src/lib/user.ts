@@ -62,6 +62,7 @@ export function toSafeUser(user: User) {
     twitchLogin: user.twitchLogin,
     twitchDisplayName: user.twitchDisplayName,
     twitchAvatar: user.twitchAvatar,
+    twitchEventSub: user.twitchEventSub,
     avatarUrl: user.avatarUrl,
     hasPassword: Boolean(user.passwordHash),
     googleId: user.googleId,

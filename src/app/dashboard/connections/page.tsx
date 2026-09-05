@@ -27,7 +27,13 @@ export default async function ConnectionsPage() {
             <h2 className="text-sm font-medium">Twitch</h2>
             <Badge on={Boolean(user.twitchLogin)}>{user.twitchLogin ? "Підключено" : "Немає каналу"}</Badge>
           </div>
-          <p className="mt-2 text-sm text-zinc-500">{user.twitchDisplayName || "Нік каналу. Аватар можна завантажити окремо."}</p>
+          <p className="mt-2 text-sm text-zinc-500">
+            {user.twitchDisplayName
+              ? user.twitchEventSub
+                ? `${user.twitchDisplayName} · алерти увімкнено`
+                : user.twitchDisplayName
+              : "Нік каналу, фоловери, підписки, bits і рейди."}
+          </p>
           <Link href="/dashboard/twitch" className="mt-4 inline-flex text-sm font-medium text-zinc-900 hover:underline">
             Керувати
           </Link>

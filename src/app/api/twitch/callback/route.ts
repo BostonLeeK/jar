@@ -1,6 +1,8 @@
+import { encrypt } from "@/lib/crypto";
 import { prisma } from "@/lib/prisma";
 import { verifyState } from "@/lib/session";
 import { exchangeTwitchCode, fetchTwitchUser } from "@/lib/twitch";
+import { ensureEventSub } from "@/lib/twitch-eventsub";
 import { getPublicOrigin } from "@/lib/urls";
 import { NextResponse } from "next/server";
 
@@ -20,6 +22,7 @@ export async function GET(req: Request) {
     const userId = await verifyState(state);
     const tokens = await exchangeTwitchCode(code, origin);
     const profile = await fetchTwitchUser(tokens.access_token);
+    const twitchEventSub = await ensureEventSub(profile.id).catch(() => false);
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -27,6 +30,9 @@ export async function GET(req: Request) {
         twitchLogin: profile.login,
         twitchDisplayName: profile.display_name,
         twitchAvatar: profile.profile_image_url,
+        twitchAccessEnc: encrypt(tokens.access_token),
+        twitchRefreshEnc: tokens.refresh_token ? encrypt(tokens.refresh_token) : null,
+        twitchEventSub,
       },
     });
     return NextResponse.redirect(`${origin}/dashboard/twitch`);

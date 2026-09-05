@@ -1,3 +1,4 @@
+import type { OverlayAlert } from "@/lib/alerts";
 import type { Donation } from "@prisma/client";
 import { emitDonation } from "@/lib/events";
 import type { MonoStatementItem } from "@/lib/mono";
@@ -8,9 +9,10 @@ function extractCode(value: string) {
   return match?.[0] ?? "";
 }
 
-function toEvent(donation: Donation) {
+function toEvent(donation: Donation): OverlayAlert {
   return {
     id: donation.id,
+    kind: "donation",
     amount: donation.amount,
     nickname: donation.nickname,
     message: donation.message,

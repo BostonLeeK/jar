@@ -26,6 +26,13 @@ export function pickAlertTier(tiers: AlertTierConfig[], amount: number) {
     .sort((a, b) => b.minAmount - a.minAmount)[0] ?? null;
 }
 
+export function pickAlertVisual(tiers: AlertTierConfig[], alert: { kind?: string; amount: number }) {
+  if (alert.kind && alert.kind !== "donation") {
+    return [...tiers].sort((a, b) => a.minAmount - b.minAmount)[0] ?? null;
+  }
+  return pickAlertTier(tiers, alert.amount);
+}
+
 export function overlayPalette(tone: string) {
   if (tone === "light") {
     return {

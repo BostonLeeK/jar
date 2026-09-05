@@ -1,12 +1,14 @@
 "use client";
 
+import { formatAlertDetail, type AlertKind } from "@/lib/alerts";
 import { formatUah } from "@/lib/money";
-import { overlayPalette, pickAlertTier, type AlertTierConfig } from "@/lib/overlay";
+import { overlayPalette, pickAlertVisual, type AlertTierConfig } from "@/lib/overlay";
 import { cn } from "@/lib/cn";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export type OverlayDonation = {
   id: string;
+  kind?: AlertKind;
   amount: number;
   nickname: string;
   message: string;
@@ -65,7 +67,7 @@ export function useOverlayAlerts(token: string, duration: number) {
     let hide: number | undefined;
     source.onmessage = (event) => {
       const payload = JSON.parse(event.data) as { type: string } & OverlayDonation;
-      if (payload.type !== "donation") {
+      if (payload.type !== "donation" && payload.type !== "alert") {
         return;
       }
       setCurrent(payload);
@@ -107,14 +109,15 @@ export function useAlertEffects(donation: OverlayDonation | null, state: Overlay
     if (!donation || !current) {
       return;
     }
-    const tier = pickAlertTier(current.alertTiers, donation.amount);
-    const shouldSpeak = current.alertTts && (tier ? tier.tts : true) && Boolean(donation.message.trim());
+    const tier = pickAlertVisual(current.alertTiers, donation);
+    const spoken = donation.message.trim() || `${donation.nickname} ${formatAlertDetail(donation)}`;
+    const shouldSpeak = current.alertTts && (tier ? tier.tts : true) && Boolean(spoken);
     let audio: HTMLAudioElement | null = null;
     let cancelled = false;
 
     const speak = () => {
       if (!cancelled && shouldSpeak) {
-        speakDonation(donation.message);
+        speakDonation(spoken);
       }
     };
 
@@ -178,7 +181,7 @@ export function AlertView({
     return null;
   }
   const palette = overlayPalette(state.overlayTone);
-  const tier = pickAlertTier(state.alertTiers, donation.amount);
+  const tier = pickAlertVisual(state.alertTiers, donation);
   return (
     <Frame style={state.alertStyle} tone={state.overlayTone} className="max-w-full">
       {tier?.gifUrl ? (
@@ -189,7 +192,7 @@ export function AlertView({
         <span className="mx-2" style={{ color: palette.dim }}>
           —
         </span>
-        <span className="font-mono">{formatUah(donation.amount)}</span>
+        <span className="font-mono">{formatAlertDetail(donation)}</span>
       </p>
       {state.alertShowMessage && donation.message ? (
         <p className="mt-1 text-sm" style={{ color: palette.muted }}>

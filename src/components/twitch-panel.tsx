@@ -9,14 +9,17 @@ import { useState } from "react";
 export function TwitchPanel({
   user,
   configured,
+  reachable,
   error,
 }: {
   user: SafeUser;
   configured: boolean;
+  reachable: boolean;
   error?: string;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
+  const needsAlerts = Boolean(user.twitchLogin && !user.twitchEventSub);
 
   async function disconnect() {
     setPending(true);
@@ -28,30 +31,50 @@ export function TwitchPanel({
   return (
     <Card className="p-5">
       {user.twitchLogin ? (
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {user.twitchAvatar ? (
-              <Image
-                src={user.twitchAvatar}
-                alt=""
-                width={40}
-                height={40}
-                className="h-10 w-10 rounded-full"
-              />
-            ) : null}
-            <div>
-              <p className="text-sm font-medium">{user.twitchDisplayName}</p>
-              <p className="text-xs text-zinc-500">twitch.tv/{user.twitchLogin}</p>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              {user.twitchAvatar ? (
+                <Image
+                  src={user.twitchAvatar}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-full"
+                />
+              ) : null}
+              <div>
+                <p className="text-sm font-medium">{user.twitchDisplayName}</p>
+                <p className="text-xs text-zinc-500">twitch.tv/{user.twitchLogin}</p>
+              </div>
             </div>
+            <Button type="button" variant="danger" onClick={disconnect} disabled={pending}>
+              Відʼєднати
+            </Button>
           </div>
-          <Button type="button" variant="danger" onClick={disconnect} disabled={pending}>
-            Відʼєднати
-          </Button>
+          {user.twitchEventSub ? (
+            <p className="text-sm text-zinc-500">
+              Алерти в оверлеї: фоловери, підписки, гіфти, bits і рейди. Донати з Банки рахуються окремо.
+            </p>
+          ) : needsAlerts && reachable ? (
+            <div className="space-y-3">
+              <p className="text-sm text-zinc-500">
+                Канал підключено без алертів. Підключи знову, щоб дозволити фоловерів, підписки, bits і рейди.
+              </p>
+              <a href="/api/twitch/start">
+                <Button type="button">Увімкнути алерти Twitch</Button>
+              </a>
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-500">
+              Нік на сторінці донатів уже є. Живі алерти Twitch увімкнуться на публічному https — локально EventSub не доходить.
+            </p>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
           <p className="text-sm text-zinc-500">
-            Підключи канал, щоб на сторінці зʼявився нік Twitch. Аватар можна завантажити окремо в редакторі сторінки.
+            Підключи канал: нік зʼявиться на сторінці донатів, а фоловери, підписки, гіфти, bits і рейди підуть у той самий алерт, що й Банка.
           </p>
           {configured ? (
             <a href="/api/twitch/start">

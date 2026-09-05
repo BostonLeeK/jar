@@ -29,17 +29,25 @@ export function WidgetsPanel({
     router.refresh();
   }
 
-  async function testAlert() {
+  async function testAlert(kind?: "follow" | "sub") {
     setTestPending(true);
-    await fetch("/api/donations/test", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nickname: "boston_fan",
-        amount: 200,
-        message: "запускай Condemned",
-      }),
-    });
+    if (kind) {
+      await fetch("/api/alerts/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind }),
+      });
+    } else {
+      await fetch("/api/donations/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nickname: "boston_fan",
+          amount: 200,
+          message: "запускай Condemned",
+        }),
+      });
+    }
     setTestPending(false);
   }
 
@@ -50,8 +58,14 @@ export function WidgetsPanel({
         <CopyField label="Прогрес збору" value={goalUrl} hint="Browser Source 480×90." />
         <CopyField label="Останні донати" value={recentUrl} hint="Browser Source 360×280." />
         <div className="flex flex-wrap gap-2">
-          <Button type="button" onClick={testAlert} disabled={testPending}>
-            {testPending ? "Надсилаю…" : "Тестовий алерт"}
+          <Button type="button" onClick={() => testAlert()} disabled={testPending}>
+            {testPending ? "Надсилаю…" : "Тест донат"}
+          </Button>
+          <Button type="button" variant="secondary" onClick={() => testAlert("follow")} disabled={testPending}>
+            Тест фоловер
+          </Button>
+          <Button type="button" variant="secondary" onClick={() => testAlert("sub")} disabled={testPending}>
+            Тест підписка
           </Button>
           <ClearTestDonations />
           <Button type="button" variant="secondary" onClick={rotate} disabled={pending}>

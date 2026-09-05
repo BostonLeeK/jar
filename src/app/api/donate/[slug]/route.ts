@@ -47,6 +47,7 @@ export async function POST(
   });
 
   return NextResponse.json({
+    id: pending.id,
     code: pending.code,
     amount,
     payUrl: jarPayUrl(user.monoSendId, { amount, comment: pending.code }),
