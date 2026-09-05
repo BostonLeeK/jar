@@ -1,6 +1,6 @@
 "use client";
 
-import { RecentView, useOverlayState } from "@/components/overlay-widgets";
+import { OverlayShell, RecentView, useOverlayState } from "@/components/overlay-widgets";
 import { useParams } from "next/navigation";
 
 export default function RecentOverlayPage() {
@@ -10,8 +10,8 @@ export default function RecentOverlayPage() {
     return null;
   }
   return (
-    <main className="flex min-h-screen items-start p-4">
+    <OverlayShell align="start">
       <RecentView state={state} />
-    </main>
+    </OverlayShell>
   );
 }

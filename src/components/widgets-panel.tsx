@@ -57,15 +57,19 @@ export function WidgetsPanel({
   return (
     <div className="space-y-6">
       <Card className="space-y-4 p-5">
-        <CopyField label="Alert overlay" value={alertUrl} hint="Browser Source 800×400, прозорий фон, Control audio via OBS." />
-        <CopyField label="Прогрес збору" value={goalUrl} hint="Browser Source 480×90." />
-        <CopyField label="Останні донати" value={recentUrl} hint="Browser Source 360×280." />
+        <CopyField
+          label="Alert overlay"
+          value={alertUrl}
+          hint="Browser Source 1600×800, прозорий фон, Control audio via OBS. Scale 100%."
+        />
+        <CopyField label="Прогрес збору" value={goalUrl} hint="Browser Source 960×180. Width/Height = розмір на стрімі." />
+        <CopyField label="Останні донати" value={recentUrl} hint="Browser Source 720×520. Не розтягуй джерело — міняй Width/Height." />
         <CopyField
           label="Чат Twitch"
           value={chatUrl}
           hint={
             twitchLogin
-              ? "Browser Source 360×480, прозорий фон. Рядки зникають за тривалістю віджета."
+              ? "Browser Source 720×900, прозорий фон. Scale залиш 100%."
               : "Підключи Twitch у кабінеті, інакше чат буде порожній."
           }
         />
@@ -91,9 +95,9 @@ export function WidgetsPanel({
         <ol className="mt-3 space-y-2 text-sm text-zinc-500">
           <li>1. Sources → Browser</li>
           <li>2. Встав URL віджета</li>
-          <li>3. Refresh browser when scene becomes active — увімкни</li>
-          <li>4. Shutdown source when not visible можна лишити вимкненим, якщо алерти зникають</li>
-          <li>5. Custom CSS можна лишити порожнім</li>
+          <li>3. Width і Height постав як хочеш бачити на стрімі. Scale в Transform — 100%</li>
+          <li>4. Refresh browser when scene becomes active — увімкни</li>
+          <li>5. Shutdown source when not visible можна лишити вимкненим, якщо алерти зникають</li>
         </ol>
       </Card>
     </div>

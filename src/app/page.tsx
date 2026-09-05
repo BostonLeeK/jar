@@ -33,7 +33,7 @@ const FAQ = [
   },
   {
     q: "OBS як підключити?",
-    a: "Кабінет → Віджети → скопіюй URL → Sources → Browser. Прозорий фон, 800×400 для алерту, увімкни Control audio via OBS.",
+    a: "Кабінет → Віджети → скопіюй URL → Sources → Browser. Прозорий фон, Width/Height як на стрімі, Scale 100%, Control audio via OBS.",
   },
 ];
 

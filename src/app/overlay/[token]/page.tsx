@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertView, useAlertEffects, useOverlayAlerts, useOverlayState } from "@/components/overlay-widgets";
+import { AlertView, OverlayShell, useAlertEffects, useOverlayAlerts, useOverlayState } from "@/components/overlay-widgets";
 import { useParams } from "next/navigation";
 
 export default function AlertOverlayPage() {
@@ -9,9 +9,5 @@ export default function AlertOverlayPage() {
   const donation = useOverlayAlerts(params.token, state?.overlayDuration ?? 8);
   useAlertEffects(donation, state, params.token);
 
-  return (
-    <main className="flex min-h-screen items-center justify-center p-6">
-      {state ? <AlertView donation={donation} state={state} /> : null}
-    </main>
-  );
+  return <OverlayShell>{state ? <AlertView donation={donation} state={state} /> : null}</OverlayShell>;
 }

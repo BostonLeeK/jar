@@ -38,7 +38,7 @@ function Stage({
   return (
     <div
       className={cn(
-        "flex min-h-[220px] items-end bg-[size:16px_16px] p-5",
+        "@container flex min-h-[220px] items-end bg-[size:16px_16px] p-5",
         backdrop === "dark"
           ? "bg-zinc-950 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.12)_1px,transparent_0)]"
           : "bg-zinc-100 bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.08)_1px,transparent_0)]",
@@ -66,25 +66,25 @@ export function WidgetPreviews({
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="overflow-hidden">
-        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Алерт · 800×400</p>
+        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Алерт · 1600×800</p>
         <Stage backdrop={backdrop}>
           <AlertView donation={preview.donations[0] ?? SAMPLE[0]} state={preview} />
         </Stage>
       </Card>
       <Card className="overflow-hidden">
-        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Прогрес · 480×90</p>
+        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Прогрес · 960×180</p>
         <Stage backdrop={backdrop}>
           <GoalView state={preview} />
         </Stage>
       </Card>
       <Card className="overflow-hidden">
-        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Останні донати · 360×280</p>
+        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Останні донати · 720×520</p>
         <Stage backdrop={backdrop}>
           <RecentView state={preview} />
         </Stage>
       </Card>
       <Card className="overflow-hidden">
-        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Чат Twitch · 360×480</p>
+        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Чат Twitch · 720×900</p>
         <Stage backdrop={backdrop}>
           <ChatView
             messages={SAMPLE_CHAT}

@@ -129,11 +129,11 @@ export function ChatView({
   const hold = Math.max(4, duration);
 
   return (
-    <div className="flex w-full max-w-md flex-col justify-end gap-1.5">
+    <div className="flex w-full flex-col justify-end gap-[1.2cqi]">
       {messages.map((item) => (
         <p
           key={item.id}
-          className={cn("text-[15px] leading-5", preview && "animate-[fadeIn_0.35s_ease]")}
+          className={cn("text-[clamp(14px,3.8cqi,32px)] leading-snug", preview && "animate-[fadeIn_0.35s_ease]")}
           style={{
             color: palette.text,
             textShadow: tone === "light" ? "0 1px 2px rgba(255,255,255,0.7)" : "0 1px 3px rgba(0,0,0,0.75)",
@@ -153,10 +153,10 @@ export function ChatView({
             part.type === "emote" ? (
               <img
                 key={`${item.id}-${index}`}
-                src={`https://static-cdn.jtvnw.net/emoticons/v2/${part.id}/default/dark/1.0`}
+                src={`https://static-cdn.jtvnw.net/emoticons/v2/${part.id}/default/dark/2.0`}
                 alt={part.name}
                 title={part.name}
-                className="mx-0.5 inline-block h-5 w-5 align-[-3px] object-contain"
+                className="mx-[0.15em] inline-block h-[1.25em] w-[1.25em] align-[-0.2em] object-contain"
               />
             ) : (
               <span key={`${item.id}-${index}`}>{part.text}</span>

@@ -306,6 +306,27 @@ export function useAlertEffects(donation: OverlayDonation | null, state: Overlay
   }, [donation, ready, token]);
 }
 
+export function OverlayShell({
+  align = "center",
+  children,
+}: {
+  align?: "center" | "start" | "end";
+  children: ReactNode;
+}) {
+  return (
+    <main
+      className={cn(
+        "@container flex h-screen w-screen p-[2.5vw]",
+        align === "center" && "items-center",
+        align === "start" && "items-start",
+        align === "end" && "items-end justify-start",
+      )}
+    >
+      {children}
+    </main>
+  );
+}
+
 function Frame({
   style,
   tone,
@@ -321,10 +342,10 @@ function Frame({
   return (
     <div
       className={cn(
-        "animate-[fadeIn_0.35s_ease]",
-        style === "banner" && "w-full px-6 py-4",
-        style === "card" && "w-fit rounded-xl border px-6 py-4",
-        style === "minimal" && "px-1 py-1",
+        "animate-[fadeIn_0.35s_ease] w-full",
+        style === "banner" && "px-[4cqi] py-[3cqi]",
+        style === "card" && "rounded-[2cqi] border px-[4cqi] py-[3cqi]",
+        style === "minimal" && "px-[1cqi] py-[1cqi]",
         className,
       )}
       style={{
@@ -367,19 +388,19 @@ export function AlertView({
     );
   }
   return (
-    <Frame style={state.alertStyle} tone={state.overlayTone} className="max-w-full">
+    <Frame style={state.alertStyle} tone={state.overlayTone}>
       {tier?.gifUrl ? (
-        <img src={tier.gifUrl} alt="" className="mb-3 max-h-52 max-w-full object-contain" />
+        <img src={tier.gifUrl} alt="" className="mb-[2cqi] max-h-[40cqi] max-w-full object-contain" />
       ) : null}
-      <p className="text-xl font-medium tracking-tight">
+      <p className="text-[clamp(18px,5.2cqi,56px)] font-medium leading-tight tracking-tight">
         <span style={{ color: state.overlayAccent }}>{donation.nickname}</span>
-        <span className="mx-2" style={{ color: palette.dim }}>
+        <span className="mx-[0.4em]" style={{ color: palette.dim }}>
           —
         </span>
         <span className="font-mono">{formatAlertDetail(donation)}</span>
       </p>
       {state.alertShowMessage && donation.message ? (
-        <p className="mt-1 text-sm" style={{ color: palette.muted }}>
+        <p className="mt-[0.4em] text-[clamp(13px,3.2cqi,32px)]" style={{ color: palette.muted }}>
           {donation.message}
         </p>
       ) : null}
@@ -408,20 +429,20 @@ export function GoalView({ state }: { state: OverlayState }) {
     );
   }
   return (
-    <Frame style={state.goalStyle} tone={state.overlayTone} className="w-[440px] max-w-full">
+    <Frame style={state.goalStyle} tone={state.overlayTone}>
       {state.goalShowTitle ? (
-        <div className="mb-2 flex items-baseline justify-between text-sm">
-          <span className="font-medium">{state.name}</span>
-          <span className="font-mono" style={{ color: palette.muted }}>
+        <div className="mb-[2cqi] flex items-baseline justify-between gap-[3cqi] text-[clamp(14px,4.4cqi,42px)]">
+          <span className="truncate font-medium">{state.name}</span>
+          <span className="shrink-0 font-mono" style={{ color: palette.muted }}>
             {formatUah(state.raised)} / {formatUah(state.goal)}
           </span>
         </div>
       ) : (
-        <div className="mb-2 text-right font-mono text-sm" style={{ color: palette.muted }}>
+        <div className="mb-[2cqi] text-right font-mono text-[clamp(14px,4.4cqi,42px)]" style={{ color: palette.muted }}>
           {formatUah(state.raised)} / {formatUah(state.goal)}
         </div>
       )}
-      <div className="h-2 overflow-hidden rounded-full" style={{ background: palette.track }}>
+      <div className="h-[clamp(8px,2cqi,18px)] overflow-hidden rounded-full" style={{ background: palette.track }}>
         <div className="h-full rounded-full" style={{ width: `${progress}%`, background: state.overlayAccent }} />
       </div>
     </Frame>
@@ -447,20 +468,26 @@ export function RecentView({ state }: { state: OverlayState }) {
     );
   }
   return (
-    <Frame style={state.recentStyle} tone={state.overlayTone} className="w-[320px] max-w-full">
-      <p className="mb-2 text-xs uppercase tracking-[0.16em]" style={{ color: palette.dim }}>
+    <Frame style={state.recentStyle} tone={state.overlayTone}>
+      <p
+        className="mb-[2cqi] text-[clamp(11px,3cqi,22px)] uppercase tracking-[0.16em]"
+        style={{ color: palette.dim }}
+      >
         {state.recentTitle || "Останні донати"}
       </p>
-      <ul className="space-y-2">
+      <ul className="space-y-[1.6cqi]">
         {items.length === 0 ? (
-          <li className="text-sm" style={{ color: palette.dim }}>
+          <li className="text-[clamp(14px,4.2cqi,36px)]" style={{ color: palette.dim }}>
             Поки тихо
           </li>
         ) : (
           items.map((item) => (
-            <li key={item.id} className="flex items-baseline justify-between gap-3 text-sm">
+            <li
+              key={item.id}
+              className="flex items-baseline justify-between gap-[3cqi] text-[clamp(14px,4.2cqi,36px)]"
+            >
               <span className="truncate">{item.nickname}</span>
-              <span className="font-mono" style={{ color: palette.muted }}>
+              <span className="shrink-0 font-mono" style={{ color: palette.muted }}>
                 {formatUah(item.amount)}
               </span>
             </li>

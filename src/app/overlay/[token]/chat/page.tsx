@@ -1,7 +1,7 @@
 "use client";
 
+import { OverlayShell, useOverlayState } from "@/components/overlay-widgets";
 import { ChatView, useTwitchChat } from "@/components/twitch-chat";
-import { useOverlayState } from "@/components/overlay-widgets";
 import { useParams } from "next/navigation";
 
 export default function ChatOverlayPage() {
@@ -15,14 +15,14 @@ export default function ChatOverlayPage() {
 
   if (!state.twitchLogin) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-4 text-sm text-white/80">
-        Підключи Twitch у кабінеті, щоб показати чат.
-      </main>
+      <OverlayShell>
+        <p className="text-[clamp(14px,3.6cqi,28px)] text-white/80">Підключи Twitch у кабінеті, щоб показати чат.</p>
+      </OverlayShell>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-end p-4">
+    <OverlayShell align="end">
       <ChatView
         messages={chat.messages}
         tone={state.overlayTone}
@@ -30,6 +30,6 @@ export default function ChatOverlayPage() {
         duration={state.overlayDuration}
         onDone={chat.dismiss}
       />
-    </main>
+    </OverlayShell>
   );
 }
