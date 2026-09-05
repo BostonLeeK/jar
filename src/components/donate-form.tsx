@@ -48,9 +48,10 @@ export function DonateForm({
     if (!pay || preview || thanks || expired) {
       return;
     }
+    const payId = pay.id;
     let active = true;
     async function tick() {
-      const res = await fetch(`/api/donate/${slug}/status?id=${encodeURIComponent(pay.id)}`, { cache: "no-store" });
+      const res = await fetch(`/api/donate/${slug}/status?id=${encodeURIComponent(payId)}`, { cache: "no-store" });
       if (!res.ok || !active) {
         return;
       }
