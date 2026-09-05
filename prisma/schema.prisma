@@ -62,6 +62,7 @@ model User {
   recentLimit       Int     @default(5)
   recentTitle       String  @default("Останні донати")
   alertTts          Boolean @default(false)
+  ttsLang           String  @default("uk")
   pageViews         Int     @default(0)
   pageUseCustom     Boolean @default(false)
   pageCustomHtml    String  @default("")

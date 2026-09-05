@@ -166,30 +166,35 @@ export function DonatePageView({
 
   const card = (
     <div
-      className={cn("relative isolate h-full w-full overflow-hidden", !preview && "max-h-[860px]")}
+      className={cn("relative isolate w-full overflow-hidden", preview ? "h-full" : "min-h-dvh")}
       style={{ background: theme.background, color: theme.text }}
     >
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-[46%]">
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/2">
         {cover ? <img src={cover} alt="" className="h-full w-full object-cover" /> : <ThemeArt theme={theme} />}
       </div>
       <div className="pointer-events-none absolute inset-0" style={{ background: theme.veil }} />
       {theme.id === "paper" ? <div className="pointer-events-none absolute inset-0 jar-paper" /> : null}
       {theme.note ? (
         <p
-          className="pointer-events-none absolute right-5 bottom-24 max-w-[38%] text-right text-[22px] leading-none opacity-70"
+          className="pointer-events-none absolute right-6 bottom-10 z-10 max-w-[12rem] text-right text-[22px] leading-none opacity-70 sm:right-10"
           style={{ fontFamily: "var(--font-caveat)", color: theme.muted }}
         >
           {theme.note}
         </p>
       ) : null}
 
-      <div className="relative z-10 flex h-full flex-col px-6 py-6">
+      <div
+        className={cn(
+          "relative z-10 mx-auto flex w-full max-w-5xl flex-col px-6 py-5 sm:px-8 lg:px-10",
+          preview ? "h-full" : "min-h-dvh",
+        )}
+      >
         <header className="flex items-center justify-between gap-3">
           <LogoMark tone={theme.tone} className="h-7" />
           <DonateChrome slug={slug} color={theme.text} border={theme.border} preview={preview} />
         </header>
 
-        <div className="mt-16 max-w-[17.5rem] space-y-5">
+        <div className="flex w-full max-w-[18rem] flex-1 flex-col justify-center space-y-5 sm:max-w-xs">
           <div>
             <h1 className={cn("text-[2.15rem] leading-[1.08] sm:text-[2.4rem]", headingClass(theme))}>{title}</h1>
             <p className="mt-2 text-sm leading-6" style={{ color: theme.muted }}>
@@ -250,7 +255,7 @@ export function DonatePageView({
         </div>
 
         {social && hasSocial(social) ? (
-          <div className="mt-auto flex items-center gap-1 pt-8" style={{ color: theme.text }}>
+          <div className="flex items-center gap-1 pt-4" style={{ color: theme.text }}>
             {social.twitch ? (
               <SocialIcon href={social.twitch} label="Twitch" color={theme.text}>
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
@@ -297,7 +302,7 @@ export function DonatePageView({
             ) : null}
           </div>
         ) : (
-          <div className="mt-auto pt-8" />
+          <div className="pt-4" />
         )}
       </div>
     </div>
@@ -308,14 +313,9 @@ export function DonatePageView({
   }
 
   return (
-    <div
-      className="flex min-h-dvh items-center justify-center p-4"
-      style={{ background: theme.tone === "dark" ? "#111111" : "#ded8d0" }}
-    >
-      <style>{`html,body{background:${theme.tone === "dark" ? "#111111" : "#ded8d0"}!important;min-height:100dvh;}`}</style>
-      <div className="h-[min(860px,100dvh)] w-full max-w-[420px] overflow-hidden rounded-[28px] shadow-2xl">
-        {card}
-      </div>
-    </div>
+    <>
+      <style>{`html,body{background:${theme.background}!important;min-height:100dvh;}`}</style>
+      {card}
+    </>
   );
 }

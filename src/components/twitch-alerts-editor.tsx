@@ -94,7 +94,8 @@ export function TwitchAlertsEditor({
             <AlertFileSlot
               label="Аудіо"
               accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg"
-              hint={item.audioUrl ? "Файл є · замінити" : "MP3 / WAV / OGG"}
+              audio={item.audioUrl}
+              hint={item.audioUrl ? "Замінити" : "MP3 / WAV / OGG"}
               disabled={pending}
               progress={progress?.key === `${item.id}:audio` ? progress.value : null}
               onFile={(file) => void upload(item.id, "audio", file)}

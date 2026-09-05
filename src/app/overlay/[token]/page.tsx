@@ -7,7 +7,7 @@ export default function AlertOverlayPage() {
   const params = useParams<{ token: string }>();
   const state = useOverlayState(params.token);
   const donation = useOverlayAlerts(params.token, state?.overlayDuration ?? 8);
-  useAlertEffects(donation, state);
+  useAlertEffects(donation, state, params.token);
 
   return (
     <main className="flex min-h-screen items-center justify-center p-6">

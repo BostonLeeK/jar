@@ -272,7 +272,7 @@ export function PageEditor({ user }: { user: SafeUser }) {
             Відкрити
           </a>
         </div>
-        <ScaledFrame width={420} height={860}>
+        <ScaledFrame width={390} height={844}>
           <DonatePageView {...preview} />
         </ScaledFrame>
       </div>

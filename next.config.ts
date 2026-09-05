@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ["edge-tts-universal"],
   images: {
     localPatterns: [{ pathname: "/uploads/**" }, { pathname: "/api/media/**" }],
     remotePatterns: [

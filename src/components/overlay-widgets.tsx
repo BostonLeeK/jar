@@ -36,6 +36,7 @@ export type OverlayState = {
   recentLimit: number;
   recentTitle: string;
   alertTts: boolean;
+  ttsLang: string;
   alertTiers: AlertTierConfig[];
   twitchAlerts: TwitchAlertConfig[];
   donations: OverlayDonation[];
@@ -138,16 +139,15 @@ export function useOverlayAlerts(token: string, duration: number) {
   return current;
 }
 
-function speakDonation(text: string) {
+function speakBrowser(text: string, lang: string) {
   if (!window.speechSynthesis || !text.trim()) {
     return;
   }
   const utter = new SpeechSynthesisUtterance(text.trim());
-  utter.lang = "uk-UA";
+  utter.lang = lang === "en" ? "en-US" : "uk-UA";
   utter.rate = 1;
-  const voice = window.speechSynthesis
-    .getVoices()
-    .find((item) => item.lang.toLowerCase().startsWith("uk"));
+  const prefix = lang === "en" ? "en" : "uk";
+  const voice = window.speechSynthesis.getVoices().find((item) => item.lang.toLowerCase().startsWith(prefix));
   if (voice) {
     utter.voice = voice;
   }
@@ -155,7 +155,17 @@ function speakDonation(text: string) {
   window.speechSynthesis.speak(utter);
 }
 
-export function useAlertEffects(donation: OverlayDonation | null, state: OverlayState | null) {
+function speakDonation(text: string, token: string, lang: string) {
+  const spoken = text.trim();
+  if (!spoken) {
+    return null;
+  }
+  const audio = new Audio(`/api/overlay/${encodeURIComponent(token)}/tts?text=${encodeURIComponent(spoken)}`);
+  audio.play().catch(() => speakBrowser(spoken, lang));
+  return audio;
+}
+
+export function useAlertEffects(donation: OverlayDonation | null, state: OverlayState | null, token: string) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -167,30 +177,32 @@ export function useAlertEffects(donation: OverlayDonation | null, state: Overlay
     const tier = pickAlertVisual(current.alertTiers, donation, current.twitchAlerts);
     const spoken = donation.message.trim() || `${donation.nickname} ${formatAlertDetail(donation)}`;
     const shouldSpeak = current.alertTts && (tier ? tier.tts : true) && Boolean(spoken);
-    let audio: HTMLAudioElement | null = null;
+    let sound: HTMLAudioElement | null = null;
+    let voice: HTMLAudioElement | null = null;
     let cancelled = false;
 
     const speak = () => {
       if (!cancelled && shouldSpeak) {
-        speakDonation(spoken);
+        voice = speakDonation(spoken, token, current.ttsLang);
       }
     };
 
     window.speechSynthesis?.cancel();
     if (tier?.audioUrl) {
-      audio = new Audio(tier.audioUrl);
-      audio.play().then(() => undefined).catch(speak);
-      audio.onended = speak;
+      sound = new Audio(tier.audioUrl);
+      sound.play().then(() => undefined).catch(speak);
+      sound.onended = speak;
     } else {
       speak();
     }
 
     return () => {
       cancelled = true;
-      audio?.pause();
+      sound?.pause();
+      voice?.pause();
       window.speechSynthesis?.cancel();
     };
-  }, [donation]);
+  }, [donation, token]);
 }
 
 function Frame({

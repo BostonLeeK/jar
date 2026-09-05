@@ -1,9 +1,11 @@
 "use client";
 
 import { AlertFileSlot } from "@/components/alert-file-slot";
+import { TtsBar } from "@/components/tts-bar";
 import { Button, Card, Input, Label } from "@/components/ui";
 import { kopiykyToUah, uahToKopiyky } from "@/lib/money";
 import type { AlertTierConfig } from "@/lib/overlay";
+import { normalizeTtsLang, type TtsLang } from "@/lib/tts";
 import { uploadForm } from "@/lib/upload";
 import { useState } from "react";
 
@@ -12,14 +14,19 @@ type Tier = AlertTierConfig;
 export function AlertTiersEditor({
   initialTiers,
   initialTts,
+  initialTtsLang,
   onTiersChange,
+  onTtsLangChange,
 }: {
   initialTiers: Tier[];
   initialTts: boolean;
+  initialTtsLang?: string;
   onTiersChange: (tiers: Tier[]) => void;
+  onTtsLangChange?: (lang: TtsLang) => void;
 }) {
   const [tiers, setTiers] = useState(initialTiers);
   const [tts, setTts] = useState(initialTts);
+  const [ttsLang, setTtsLang] = useState<TtsLang>(normalizeTtsLang(initialTtsLang));
   const [pending, setPending] = useState(false);
   const [progress, setProgress] = useState<{ key: string; value: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +74,16 @@ export function AlertTiersEditor({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ alertTts: value }),
+    });
+  }
+
+  async function changeLang(value: TtsLang) {
+    setTtsLang(value);
+    onTtsLangChange?.(value);
+    await fetch("/api/settings/alerts", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ttsLang: value }),
     });
   }
 
@@ -119,10 +136,7 @@ export function AlertTiersEditor({
           Додати рівень
         </Button>
       </div>
-      <label className="flex items-center gap-2 text-sm text-zinc-600">
-        <input type="checkbox" checked={tts} onChange={(event) => void toggleTts(event.target.checked)} />
-        Читати текст донату вголос
-      </label>
+      <TtsBar enabled={tts} lang={ttsLang} onEnabled={(value) => void toggleTts(value)} onLang={(value) => void changeLang(value)} />
       {tiers.length === 0 ? (
         <p className="text-sm text-zinc-500">Поки немає рівнів. Додай хоча б один — від мінімальної суми.</p>
       ) : (
@@ -157,7 +171,8 @@ export function AlertTiersEditor({
               <AlertFileSlot
                 label="Аудіо"
                 accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg"
-                hint={tier.audioUrl ? "Файл є · замінити" : "MP3 / WAV / OGG"}
+                audio={tier.audioUrl}
+                hint={tier.audioUrl ? "Замінити" : "MP3 / WAV / OGG"}
                 disabled={pending}
                 progress={progress?.key === `${tier.id}:audio` ? progress.value : null}
                 onFile={(file) => void upload(tier.id, "audio", file)}

@@ -46,6 +46,7 @@ export async function GET(
     recentLimit: user.recentLimit,
     recentTitle: user.recentTitle,
     alertTts: user.alertTts,
+    ttsLang: user.ttsLang,
     alertTiers: user.alertTiers.map((tier) => ({
       id: tier.id,
       minAmount: tier.minAmount,

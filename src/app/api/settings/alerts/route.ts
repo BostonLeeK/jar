@@ -1,5 +1,6 @@
 import { removeAlertFile } from "@/lib/alert-media";
 import { jsonError, readJson } from "@/lib/http";
+import { isTtsLang } from "@/lib/tts";
 import { clamp } from "@/lib/validate";
 import { prisma } from "@/lib/prisma";
 import { requireApiUser } from "@/lib/user";
@@ -32,13 +33,17 @@ export async function PATCH(req: Request) {
   }
   const body = await readJson<{
     alertTts?: boolean;
+    ttsLang?: string;
     tiers?: Array<{ id: string; minAmount?: number; tts?: boolean }>;
   }>(req);
 
-  if (typeof body.alertTts === "boolean") {
+  if (typeof body.alertTts === "boolean" || (body.ttsLang && isTtsLang(body.ttsLang))) {
     await prisma.user.update({
       where: { id: user.id },
-      data: { alertTts: body.alertTts },
+      data: {
+        ...(typeof body.alertTts === "boolean" ? { alertTts: body.alertTts } : {}),
+        ...(body.ttsLang && isTtsLang(body.ttsLang) ? { ttsLang: body.ttsLang } : {}),
+      },
     });
   }
 

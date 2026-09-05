@@ -42,6 +42,7 @@ export default async function WidgetsPage() {
         recentLimit={user.recentLimit}
         recentTitle={user.recentTitle}
         alertTts={user.alertTts}
+        ttsLang={user.ttsLang}
         alertTiers={alertTiers.map((tier) => ({
           id: tier.id,
           minAmount: tier.minAmount,

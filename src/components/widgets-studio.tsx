@@ -19,6 +19,7 @@ import {
   RECENT_TAGS,
 } from "@/lib/custom-defaults";
 import type { AlertTierConfig, TwitchAlertConfig } from "@/lib/overlay";
+import { normalizeTtsLang, type TtsLang } from "@/lib/tts";
 import { cn } from "@/lib/cn";
 import { useMemo, useState, type FormEvent } from "react";
 
@@ -42,6 +43,7 @@ export function WidgetsStudio({
   recentLimit,
   recentTitle,
   alertTts,
+  ttsLang,
   alertTiers,
   twitchAlerts,
   donations,
@@ -72,6 +74,7 @@ export function WidgetsStudio({
   recentLimit: number;
   recentTitle: string;
   alertTts: boolean;
+  ttsLang: string;
   alertTiers: AlertTierConfig[];
   twitchAlerts: TwitchAlertConfig[];
   donations: OverlayDonation[];
@@ -96,6 +99,7 @@ export function WidgetsStudio({
   const [recentLook, setRecentLook] = useState(recentStyle);
   const [limit, setLimit] = useState(String(recentLimit));
   const [title, setTitle] = useState(recentTitle);
+  const [voiceLang, setVoiceLang] = useState<TtsLang>(normalizeTtsLang(ttsLang));
   const [tiers, setTiers] = useState(alertTiers);
   const [twitch, setTwitch] = useState(twitchAlerts);
   const [customTab, setCustomTab] = useState<"alert" | "goal" | "recent">("alert");
@@ -131,6 +135,7 @@ export function WidgetsStudio({
       recentLimit: Number(limit) || 5,
       recentTitle: title,
       alertTts,
+      ttsLang: voiceLang,
       alertTiers: tiers,
       twitchAlerts: twitch,
       donations,
@@ -145,7 +150,7 @@ export function WidgetsStudio({
       recentCustomCss: recentCss,
       twitchLogin,
     }),
-    [accent, alert, alertCss, alertCustom, alertHtml, alertTts, donations, duration, goal, goalCss, goalCustom, goalHtml, goalLook, limit, name, raised, recentCss, recentCustom, recentHtml, recentLook, showMessage, showTitle, tiers, title, tone, twitch, twitchLogin],
+    [accent, alert, alertCss, alertCustom, alertHtml, alertTts, donations, duration, goal, goalCss, goalCustom, goalHtml, goalLook, limit, name, raised, recentCss, recentCustom, recentHtml, recentLook, showMessage, showTitle, tiers, title, tone, twitch, twitchLogin, voiceLang],
   );
 
   async function save(event: FormEvent) {
@@ -365,7 +370,13 @@ export function WidgetsStudio({
         </Button>
       </form>
 
-      <AlertTiersEditor initialTiers={alertTiers} initialTts={alertTts} onTiersChange={setTiers} />
+      <AlertTiersEditor
+        initialTiers={alertTiers}
+        initialTts={alertTts}
+        initialTtsLang={ttsLang}
+        onTiersChange={setTiers}
+        onTtsLangChange={setVoiceLang}
+      />
       <TwitchAlertsEditor initialAlerts={twitchAlerts} onChange={setTwitch} />
 
       <div className="space-y-4">
