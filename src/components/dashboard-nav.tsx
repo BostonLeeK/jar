@@ -2,7 +2,6 @@
 
 import {
   IconChart,
-  IconHelp,
   IconHome,
   IconPage,
   IconPlug,
@@ -52,7 +51,7 @@ export function DashboardNav({ email }: { email: string }) {
               key={link.href}
               href={link.href}
               className={cn(
-                "flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3 py-2 text-sm transition-colors",
+                "flex cursor-pointer items-center gap-2.5 whitespace-nowrap rounded-xl px-3 py-2 text-sm transition-colors",
                 active ? "bg-zinc-100 font-medium text-zinc-900" : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900",
               )}
             >
@@ -64,10 +63,6 @@ export function DashboardNav({ email }: { email: string }) {
       </nav>
       <div className="mt-6 hidden space-y-3 md:mt-auto md:block">
         <p className="truncate px-2 text-xs text-zinc-400">{email}</p>
-        <Link href="/dashboard/settings" className="flex items-center gap-2 px-2 text-sm text-zinc-500 hover:text-zinc-900">
-          <IconHelp className="h-4 w-4" />
-          Підтримка
-        </Link>
         <LogoutButton />
       </div>
     </aside>

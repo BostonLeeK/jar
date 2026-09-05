@@ -28,18 +28,18 @@ export function SiteHeader({ authed, marketing }: { authed?: boolean; marketing?
           {authed ? (
             <Link
               href="/dashboard"
-              className="rounded-xl bg-zinc-900 px-3 py-2 font-medium text-white hover:bg-zinc-800"
+              className="rounded-xl bg-zinc-900 px-3 py-2 font-medium text-white transition-all duration-150 hover:-translate-y-px hover:bg-zinc-800 hover:shadow-sm"
             >
               Кабінет
             </Link>
           ) : (
             <>
-              <Link href="/login" className="rounded-xl px-3 py-2 text-zinc-500 hover:text-zinc-900">
+              <Link href="/login" className="rounded-xl px-3 py-2 text-zinc-500 transition-colors hover:text-zinc-900">
                 Увійти
               </Link>
               <Link
                 href="/register"
-                className="rounded-xl bg-zinc-900 px-3 py-2 font-medium text-white hover:bg-zinc-800"
+                className="rounded-xl bg-zinc-900 px-3 py-2 font-medium text-white transition-all duration-150 hover:-translate-y-px hover:bg-zinc-800 hover:shadow-sm"
               >
                 Почати безкоштовно
               </Link>

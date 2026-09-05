@@ -12,7 +12,7 @@ export async function GET(
     include: {
       donations: {
         orderBy: { createdAt: "desc" },
-        take: 8,
+        take: 12,
       },
     },
   });
@@ -25,12 +25,20 @@ export async function GET(
 
   return NextResponse.json({
     name: user.pageTitle || user.name,
-    accentColor: user.accentColor,
+    accentColor: user.overlayAccent || user.accentColor,
     showGoal: user.showGoal,
     raised,
     goal,
+    overlayTone: user.overlayTone,
+    overlayAccent: user.overlayAccent || user.accentColor,
     overlayDuration: user.overlayDuration,
     alertStyle: user.alertStyle,
+    alertShowMessage: user.alertShowMessage,
+    goalStyle: user.goalStyle,
+    goalShowTitle: user.goalShowTitle,
+    recentStyle: user.recentStyle,
+    recentLimit: user.recentLimit,
+    recentTitle: user.recentTitle,
     donations: user.donations.map((item) => ({
       id: item.id,
       amount: item.amount,

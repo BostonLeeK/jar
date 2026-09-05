@@ -1,5 +1,6 @@
 "use client";
 
+import { AvatarField } from "@/components/avatar-field";
 import { Button, Card, FieldError, Input, Label } from "@/components/ui";
 import { donatePath } from "@/lib/urls";
 import type { SafeUser } from "@/lib/user";
@@ -13,7 +14,6 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
   const [profileOk, setProfileOk] = useState(false);
   const [passwordOk, setPasswordOk] = useState(false);
   const [pending, setPending] = useState(false);
-  const [tokenPending, setTokenPending] = useState(false);
   const donateUrl = `${appUrl}${donatePath(user.slug)}`;
 
   async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
@@ -47,12 +47,20 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
     setPasswordError(null);
     setPasswordOk(false);
     const form = new FormData(event.currentTarget);
+    const next = String(form.get("next") ?? "");
+    const confirm = String(form.get("confirm") ?? "");
+    if (next !== confirm) {
+      setPending(false);
+      setPasswordError("Паролі не збігаються");
+      return;
+    }
     const res = await fetch("/api/settings/password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         current: form.get("current"),
         next: form.get("next"),
+        confirm: form.get("confirm"),
       }),
     });
     const data = (await res.json()) as { error?: string };
@@ -65,18 +73,14 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
     event.currentTarget.reset();
   }
 
-  async function rotateToken() {
-    setTokenPending(true);
-    await fetch("/api/settings", { method: "POST" });
-    setTokenPending(false);
-    router.refresh();
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6 lg:grid-cols-2">
       <Card className="p-5">
         <h2 className="text-sm font-medium">Профіль</h2>
         <p className="mt-1 text-sm text-zinc-500">Імʼя, email і адреса сторінки донатів.</p>
+        <div className="mt-4">
+          <AvatarField avatar={user.avatarUrl} fallback={user.twitchAvatar} name={user.name} />
+        </div>
         <form onSubmit={saveProfile} className="mt-4 space-y-3">
           <div>
             <Label htmlFor="name">Імʼя</Label>
@@ -101,32 +105,30 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
 
       <Card className="p-5">
         <h2 className="text-sm font-medium">Пароль</h2>
+        <p className="mt-1 text-sm text-zinc-500">
+          {user.hasPassword ? "Зміна пароля з підтвердженням." : "Для акаунта Google можна задати пароль окремо."}
+        </p>
         <form onSubmit={changePassword} className="mt-4 space-y-3">
+          {user.hasPassword ? (
+            <div>
+              <Label htmlFor="current">Поточний</Label>
+              <Input id="current" name="current" type="password" required />
+            </div>
+          ) : null}
           <div>
-            <Label htmlFor="current">Поточний</Label>
-            <Input id="current" name="current" type="password" required />
+            <Label htmlFor="next">Новий пароль</Label>
+            <Input id="next" name="next" type="password" required minLength={8} />
           </div>
           <div>
-            <Label htmlFor="next">Новий</Label>
-            <Input id="next" name="next" type="password" required minLength={8} />
+            <Label htmlFor="confirm">Підтвердження пароля</Label>
+            <Input id="confirm" name="confirm" type="password" required minLength={8} />
           </div>
           <FieldError>{passwordError}</FieldError>
           {passwordOk ? <p className="text-sm text-emerald-600">Пароль оновлено</p> : null}
           <Button type="submit" disabled={pending}>
-            Змінити пароль
+            {user.hasPassword ? "Змінити пароль" : "Встановити пароль"}
           </Button>
         </form>
-      </Card>
-
-      <Card className="p-5">
-        <h2 className="text-sm font-medium">Токен overlay</h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          Якщо URL віджета засвітився — онови токен і встав новий в OBS.
-        </p>
-        <p className="mt-3 break-all font-mono text-xs text-zinc-500">{user.overlayToken}</p>
-        <Button type="button" variant="secondary" className="mt-4" onClick={rotateToken} disabled={tokenPending}>
-          {tokenPending ? "Оновлюю…" : "Оновити токен"}
-        </Button>
       </Card>
     </div>
   );

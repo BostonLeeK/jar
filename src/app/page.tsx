@@ -41,6 +41,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-dvh bg-white text-zinc-900">
+      <style>{`html,body{background:#fff!important;min-height:100dvh;}`}</style>
       <SiteHeader authed={Boolean(user)} marketing />
 
       <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
@@ -55,13 +56,13 @@ export default async function HomePage() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={startHref}
-              className="inline-flex h-12 items-center rounded-xl bg-zinc-900 px-5 text-sm font-medium text-white hover:bg-zinc-800"
+              className="inline-flex h-12 items-center rounded-xl bg-zinc-900 px-5 text-sm font-medium text-white transition-all duration-150 hover:-translate-y-px hover:bg-zinc-800 hover:shadow-sm"
             >
               {user ? "Відкрити кабінет" : "Почати безкоштовно"}
             </Link>
             <a
               href="#how"
-              className="inline-flex h-12 items-center rounded-xl border border-zinc-200 px-5 text-sm text-zinc-700 hover:bg-zinc-50"
+              className="inline-flex h-12 items-center rounded-xl border border-zinc-200 px-5 text-sm text-zinc-700 transition-all duration-150 hover:-translate-y-px hover:bg-zinc-50 hover:shadow-sm"
             >
               Як це працює
             </a>
@@ -182,7 +183,7 @@ export default async function HomePage() {
           <p className="mt-3 max-w-lg text-zinc-400">Банка, шаблон, віджет у OBS. Donatello не потрібен.</p>
           <Link
             href={startHref}
-            className="mt-8 inline-flex h-12 items-center rounded-xl bg-white px-5 text-sm font-medium text-zinc-900 hover:bg-zinc-100"
+            className="mt-8 inline-flex h-12 items-center rounded-xl bg-white px-5 text-sm font-medium text-zinc-900 transition-all duration-150 hover:-translate-y-px hover:bg-zinc-100 hover:shadow-sm"
           >
             {user ? "До кабінету" : "Почати безкоштовно"}
           </Link>

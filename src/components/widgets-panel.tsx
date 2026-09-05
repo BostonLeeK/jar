@@ -1,6 +1,7 @@
 "use client";
 
 import { CopyField } from "@/components/copy-field";
+import { ClearTestDonations } from "@/components/test-donations";
 import { Button, Card, Input, Label } from "@/components/ui";
 import { overlayPath } from "@/lib/urls";
 import { useRouter } from "next/navigation";
@@ -48,10 +49,11 @@ export function WidgetsPanel({
         <CopyField label="Alert overlay" value={alertUrl} hint="Browser Source 800×200, прозорий фон." />
         <CopyField label="Прогрес збору" value={goalUrl} hint="Browser Source 480×90." />
         <CopyField label="Останні донати" value={recentUrl} hint="Browser Source 360×280." />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button type="button" onClick={testAlert} disabled={testPending}>
             {testPending ? "Надсилаю…" : "Тестовий алерт"}
           </Button>
+          <ClearTestDonations />
           <Button type="button" variant="secondary" onClick={rotate} disabled={pending}>
             Оновити токен
           </Button>
@@ -107,9 +109,12 @@ export function TestDonateForm() {
         <Label htmlFor="message">Повідомлення</Label>
         <Input id="message" name="message" defaultValue="запускай Condemned" />
       </div>
-      <Button type="submit" className="sm:col-span-4 w-fit" disabled={pending}>
-        Надіслати тест
-      </Button>
+      <div className="flex flex-wrap gap-2 sm:col-span-4">
+        <Button type="submit" disabled={pending}>
+          Надіслати тест
+        </Button>
+        <ClearTestDonations />
+      </div>
     </form>
   );
 }

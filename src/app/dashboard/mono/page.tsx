@@ -17,7 +17,7 @@ export default async function MonoPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Monobank</h1>
         <p className="mt-1 text-sm text-zinc-500">Токен, банка і webhook для алертів.</p>

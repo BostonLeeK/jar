@@ -10,7 +10,8 @@ datasource db {
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
-  passwordHash String
+  passwordHash String?
+  googleId     String?  @unique
   name         String
   slug         String   @unique
   createdAt    DateTime @default(now())
@@ -28,6 +29,7 @@ model User {
   twitchLogin       String?
   twitchDisplayName String?
   twitchAvatar      String?
+  avatarUrl         String?
 
   pageTitle       String  @default("")
   pageBio         String  @default("")
@@ -37,11 +39,19 @@ model User {
   showGoal        Boolean @default(true)
   goalAmount      Int     @default(0)
   minAmount       Int     @default(1000)
-  overlayToken    String  @unique @default(cuid())
-  webhookToken    String  @unique @default(cuid())
-  overlayDuration Int     @default(8)
-  alertStyle      String  @default("minimal")
-  pageViews       Int     @default(0)
+  overlayToken      String  @unique @default(cuid())
+  webhookToken      String  @unique @default(cuid())
+  overlayTone       String  @default("dark")
+  overlayAccent     String  @default("#ffffff")
+  overlayDuration   Int     @default(8)
+  alertStyle        String  @default("minimal")
+  alertShowMessage  Boolean @default(true)
+  goalStyle         String  @default("minimal")
+  goalShowTitle     Boolean @default(true)
+  recentStyle       String  @default("minimal")
+  recentLimit       Int     @default(5)
+  recentTitle       String  @default("Останні донати")
+  pageViews         Int     @default(0)
 
   donations Donation[]
   pending   PendingDonation[]

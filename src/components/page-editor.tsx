@@ -1,5 +1,6 @@
 "use client";
 
+import { AvatarField } from "@/components/avatar-field";
 import { DonatePageView } from "@/components/donate-page";
 import { Button, Card, FieldError, Input, Label, Textarea } from "@/components/ui";
 import { kopiykyToUah, uahToKopiyky } from "@/lib/money";
@@ -13,6 +14,7 @@ export function PageEditor({ user }: { user: SafeUser }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [avatar, setAvatar] = useState(user.avatarUrl || user.twitchAvatar);
   const [form, setForm] = useState({
     pageTitle: user.pageTitle || user.name,
     pageBio: user.pageBio,
@@ -20,8 +22,6 @@ export function PageEditor({ user }: { user: SafeUser }) {
     showGoal: user.showGoal,
     goalAmount: String(kopiykyToUah(user.goalAmount || user.monoJarGoal)),
     minAmount: String(kopiykyToUah(user.minAmount)),
-    overlayDuration: String(user.overlayDuration),
-    alertStyle: user.alertStyle,
   });
 
   const theme = getPageTheme(form.pageTheme);
@@ -31,7 +31,7 @@ export function PageEditor({ user }: { user: SafeUser }) {
       title: form.pageTitle || user.name,
       bio: form.pageBio,
       twitchLogin: user.twitchLogin,
-      twitchAvatar: user.twitchAvatar,
+      avatar,
       showGoal: form.showGoal,
       raised: user.monoJarBalance,
       goal: uahToKopiyky(Number(form.goalAmount) || 0),
@@ -41,7 +41,7 @@ export function PageEditor({ user }: { user: SafeUser }) {
       recent: [] as { id: string; nickname: string; amount: number }[],
       preview: true,
     }),
-    [form, theme, user],
+    [avatar, form, theme, user],
   );
 
   async function save(event: React.FormEvent) {
@@ -61,8 +61,6 @@ export function PageEditor({ user }: { user: SafeUser }) {
         showGoal: form.showGoal,
         goalAmount: uahToKopiyky(Number(form.goalAmount) || 0),
         minAmount: uahToKopiyky(Number(form.minAmount) || 10),
-        overlayDuration: Number(form.overlayDuration),
-        alertStyle: form.alertStyle,
       }),
     });
     const data = (await res.json()) as { error?: string };
@@ -89,7 +87,7 @@ export function PageEditor({ user }: { user: SafeUser }) {
                 type="button"
                 onClick={() => setForm((prev) => ({ ...prev, pageTheme: item.id }))}
                 className={cn(
-                  "overflow-hidden rounded-2xl border text-left transition-colors",
+                  "cursor-pointer overflow-hidden rounded-2xl border text-left transition-all duration-150 hover:-translate-y-px",
                   form.pageTheme === item.id ? "border-zinc-900" : "border-zinc-200 hover:border-zinc-400",
                 )}
               >
@@ -108,6 +106,19 @@ export function PageEditor({ user }: { user: SafeUser }) {
               </button>
             ))}
           </div>
+        </Card>
+
+        <Card className="space-y-4 p-5">
+          <div>
+            <h2 className="text-sm font-medium">Аватар</h2>
+            <p className="mt-1 text-sm text-zinc-500">Своє фото, якщо Twitch не підключений.</p>
+          </div>
+          <AvatarField
+            avatar={user.avatarUrl}
+            fallback={user.twitchAvatar}
+            name={form.pageTitle || user.name}
+            onChange={setAvatar}
+          />
         </Card>
 
         <Card className="space-y-4 p-5">
@@ -160,34 +171,6 @@ export function PageEditor({ user }: { user: SafeUser }) {
           </label>
         </Card>
 
-        <Card className="space-y-4 p-5">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="duration">Алерт, сек</Label>
-              <Input
-                id="duration"
-                type="number"
-                min={3}
-                max={20}
-                value={form.overlayDuration}
-                onChange={(event) => setForm((prev) => ({ ...prev, overlayDuration: event.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="style">Стиль алерту</Label>
-              <select
-                id="style"
-                value={form.alertStyle}
-                onChange={(event) => setForm((prev) => ({ ...prev, alertStyle: event.target.value }))}
-                className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm"
-              >
-                <option value="minimal">Minimal</option>
-                <option value="card">Card</option>
-                <option value="banner">Banner</option>
-              </select>
-            </div>
-          </div>
-        </Card>
         <FieldError>{error}</FieldError>
         <Button type="submit" disabled={pending}>
           {pending ? "Зберігаю…" : "Зберегти сторінку"}

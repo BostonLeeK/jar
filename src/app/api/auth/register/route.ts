@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import { jsonError, readJson } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/session";
-import { slugify } from "@/lib/slug";
+import { allocateSlug } from "@/lib/user";
 import { isEmail } from "@/lib/validate";
 
 export async function POST(req: Request) {
-  let body: { name?: string; email?: string; password?: string };
+  let body: { name?: string; email?: string; password?: string; confirm?: string };
   try {
     body = await readJson(req);
   } catch {
@@ -16,6 +16,7 @@ export async function POST(req: Request) {
   const name = body.name?.trim() ?? "";
   const email = body.email?.trim().toLowerCase() ?? "";
   const password = body.password ?? "";
+  const confirm = body.confirm ?? "";
 
   if (name.length < 2 || name.length > 40) {
     return jsonError("Імʼя має бути від 2 до 40 символів");
@@ -26,19 +27,13 @@ export async function POST(req: Request) {
   if (password.length < 8) {
     return jsonError("Пароль має містити щонайменше 8 символів");
   }
+  if (password !== confirm) {
+    return jsonError("Паролі не збігаються");
+  }
 
   const exists = await prisma.user.findUnique({ where: { email } });
   if (exists) {
     return jsonError("Цей email уже зареєстрований", 409);
-  }
-
-  let slug = slugify(name);
-  if (slug.length < 3) {
-    slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
-  }
-  const taken = await prisma.user.findUnique({ where: { slug } });
-  if (taken) {
-    slug = `${slug.slice(0, 24)}-${Math.random().toString(36).slice(2, 6)}`;
   }
 
   const user = await prisma.user.create({
@@ -46,7 +41,7 @@ export async function POST(req: Request) {
       name,
       email,
       passwordHash: await hash(password, 12),
-      slug,
+      slug: await allocateSlug(name),
       pageTitle: name,
     },
   });

@@ -20,7 +20,13 @@ export async function POST(req: Request) {
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || !(await compare(password, user.passwordHash))) {
+  if (!user) {
+    return jsonError("Невірний email або пароль", 401);
+  }
+  if (!user.passwordHash) {
+    return jsonError("Цей акаунт входить через Google", 401);
+  }
+  if (!(await compare(password, user.passwordHash))) {
     return jsonError("Невірний email або пароль", 401);
   }
 

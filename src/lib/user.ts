@@ -2,6 +2,23 @@ import type { User } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { readSession } from "@/lib/session";
+import { slugify } from "@/lib/slug";
+
+export function pageAvatar(user: { avatarUrl?: string | null; twitchAvatar?: string | null }) {
+  return user.avatarUrl || user.twitchAvatar || null;
+}
+
+export async function allocateSlug(name: string) {
+  let slug = slugify(name);
+  if (slug.length < 3) {
+    slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+  const taken = await prisma.user.findUnique({ where: { slug } });
+  if (taken) {
+    slug = `${slug.slice(0, 24)}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+  return slug;
+}
 
 export async function getCurrentUser() {
   const session = await readSession();
@@ -45,6 +62,9 @@ export function toSafeUser(user: User) {
     twitchLogin: user.twitchLogin,
     twitchDisplayName: user.twitchDisplayName,
     twitchAvatar: user.twitchAvatar,
+    avatarUrl: user.avatarUrl,
+    hasPassword: Boolean(user.passwordHash),
+    googleId: user.googleId,
     pageTitle: user.pageTitle,
     pageBio: user.pageBio,
     pageTheme: user.pageTheme,
@@ -54,8 +74,16 @@ export function toSafeUser(user: User) {
     goalAmount: user.goalAmount,
     minAmount: user.minAmount,
     overlayToken: user.overlayToken,
+    overlayTone: user.overlayTone,
+    overlayAccent: user.overlayAccent,
     overlayDuration: user.overlayDuration,
     alertStyle: user.alertStyle,
+    alertShowMessage: user.alertShowMessage,
+    goalStyle: user.goalStyle,
+    goalShowTitle: user.goalShowTitle,
+    recentStyle: user.recentStyle,
+    recentLimit: user.recentLimit,
+    recentTitle: user.recentTitle,
     pageViews: user.pageViews,
   };
 }

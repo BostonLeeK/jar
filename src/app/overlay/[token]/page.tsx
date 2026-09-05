@@ -10,11 +10,7 @@ export default function AlertOverlayPage() {
 
   return (
     <main className="flex min-h-screen items-end p-6">
-      <AlertView
-        donation={donation}
-        style={state?.alertStyle ?? "minimal"}
-        accent={state?.accentColor ?? "#ffffff"}
-      />
+      {state ? <AlertView donation={donation} state={state} /> : null}
     </main>
   );
 }

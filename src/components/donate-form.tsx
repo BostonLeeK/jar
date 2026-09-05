@@ -74,13 +74,13 @@ export function DonateForm({
         <a href={pay.payUrl} target="_blank" rel="noreferrer" className="block">
           <button
             type="button"
-            className="h-12 w-full text-sm font-semibold"
+            className="h-12 w-full text-sm font-semibold transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
             style={{ background: theme.accent, color: theme.buttonText, borderRadius: theme.radius }}
           >
             Відкрити Банку
           </button>
         </a>
-        <button type="button" className="text-sm" style={{ color: theme.muted }} onClick={() => setPay(null)}>
+        <button type="button" className="text-sm transition-opacity hover:opacity-80" style={{ color: theme.muted }} onClick={() => setPay(null)}>
           Змінити дані
         </button>
       </div>
@@ -131,7 +131,7 @@ export function DonateForm({
       <button
         type="submit"
         disabled={pending || preview}
-        className="h-12 w-full text-sm font-semibold disabled:opacity-50"
+        className="h-12 w-full text-sm font-semibold transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
         style={{ background: theme.accent, color: theme.buttonText, borderRadius: theme.radius }}
       >
         {pending ? "Готую…" : "Підтримати донатом"}

@@ -104,3 +104,17 @@ export async function createTestDonation(
   emitDonation(userId, toEvent(donation));
   return donation;
 }
+
+export function isTestDonation(monoTxId: string) {
+  return monoTxId.startsWith("test_");
+}
+
+export async function deleteTestDonations(userId: string, id?: string) {
+  return prisma.donation.deleteMany({
+    where: {
+      userId,
+      monoTxId: { startsWith: "test_" },
+      ...(id ? { id } : {}),
+    },
+  });
+}

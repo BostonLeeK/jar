@@ -1,10 +1,12 @@
 import { DonatePreview } from "@/components/donate-preview";
+import { ClearTestDonations, DeleteTestDonation } from "@/components/test-donations";
 import { Badge, Button, Card } from "@/components/ui";
 import { TestDonateForm } from "@/components/widgets-panel";
+import { isTestDonation } from "@/lib/donations";
 import { formatUah } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 import { donatePath, getAppUrl } from "@/lib/urls";
-import { requireUser, toSafeUser } from "@/lib/user";
+import { pageAvatar, requireUser, toSafeUser } from "@/lib/user";
 import Link from "next/link";
 
 export default async function DashboardPage() {
@@ -28,7 +30,7 @@ export default async function DashboardPage() {
   const progress = goal > 0 ? Math.min(100, Math.round((user.monoJarBalance / goal) * 100)) : 0;
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Привіт, {user.name}!</h1>
@@ -88,7 +90,10 @@ export default async function DashboardPage() {
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-sm font-medium">Останні донати</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-sm font-medium">Останні донати</h2>
+            {donations.some((item) => isTestDonation(item.monoTxId)) ? <ClearTestDonations /> : null}
+          </div>
           {donations.length === 0 ? (
             <p className="mt-3 text-sm text-zinc-500">Ще порожньо. Надішли тест або дочекайся webhook.</p>
           ) : (
@@ -96,10 +101,18 @@ export default async function DashboardPage() {
               {donations.map((item) => (
                 <div key={item.id} className="flex items-center justify-between gap-4 py-3 text-sm">
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{item.nickname}</p>
+                    <p className="truncate font-medium">
+                      {item.nickname}
+                      {isTestDonation(item.monoTxId) ? (
+                        <span className="ml-2 text-xs font-normal text-zinc-400">тест</span>
+                      ) : null}
+                    </p>
                     <p className="truncate text-zinc-500">{item.message || "—"}</p>
                   </div>
-                  <p className="shrink-0 font-medium">{formatUah(item.amount)}</p>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <p className="font-medium">{formatUah(item.amount)}</p>
+                    {isTestDonation(item.monoTxId) ? <DeleteTestDonation id={item.id} /> : null}
+                  </div>
                 </div>
               ))}
             </div>
@@ -116,7 +129,7 @@ export default async function DashboardPage() {
           raised={user.monoJarBalance}
           goal={goal}
           twitchLogin={user.twitchLogin}
-          twitchAvatar={user.twitchAvatar}
+          avatar={pageAvatar(user)}
           slug={user.slug}
           minAmount={user.minAmount}
           ready={Boolean(user.monoSendId)}

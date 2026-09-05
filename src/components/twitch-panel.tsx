@@ -51,7 +51,7 @@ export function TwitchPanel({
       ) : (
         <div className="space-y-4">
           <p className="text-sm text-zinc-500">
-            Підключи канал, щоб на сторінці донатів зʼявився нік і аватар Twitch.
+            Підключи канал, щоб на сторінці зʼявився нік Twitch. Аватар можна завантажити окремо в редакторі сторінки.
           </p>
           {configured ? (
             <a href="/api/twitch/start">

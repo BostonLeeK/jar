@@ -9,7 +9,7 @@ export function DonatePreview({
   raised,
   goal,
   twitchLogin,
-  twitchAvatar,
+  avatar,
   slug,
   minAmount,
   ready,
@@ -21,7 +21,7 @@ export function DonatePreview({
   raised: number;
   goal: number;
   twitchLogin: string | null;
-  twitchAvatar: string | null;
+  avatar: string | null;
   slug: string;
   minAmount: number;
   ready: boolean;
@@ -35,7 +35,7 @@ export function DonatePreview({
           title={name}
           bio={bio}
           twitchLogin={twitchLogin}
-          twitchAvatar={twitchAvatar}
+          avatar={avatar}
           showGoal={showGoal}
           raised={raised}
           goal={goal}

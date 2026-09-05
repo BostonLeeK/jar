@@ -1,6 +1,7 @@
 import { DonatePageView } from "@/components/donate-page";
 import { getPageTheme } from "@/lib/themes";
 import { prisma } from "@/lib/prisma";
+import { pageAvatar } from "@/lib/user";
 import { notFound } from "next/navigation";
 
 export default async function DonatePage({
@@ -32,7 +33,7 @@ export default async function DonatePage({
       title={user.pageTitle || user.name}
       bio={user.pageBio}
       twitchLogin={user.twitchLogin}
-      twitchAvatar={user.twitchAvatar}
+      avatar={pageAvatar(user)}
       showGoal={user.showGoal}
       raised={user.monoJarBalance}
       goal={user.goalAmount || user.monoJarGoal}

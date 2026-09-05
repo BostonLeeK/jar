@@ -2,6 +2,7 @@ import { jsonError, readJson } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { isValidSlug } from "@/lib/slug";
 import { requireApiUser } from "@/lib/user";
+import { isOverlayStyle, isOverlayTone } from "@/lib/overlay";
 import { isPageThemeId } from "@/lib/themes";
 import { clamp, isEmail, isHexColor } from "@/lib/validate";
 import { NextResponse } from "next/server";
@@ -27,7 +28,15 @@ export async function PATCH(req: Request) {
     goalAmount?: number;
     minAmount?: number;
     overlayDuration?: number;
+    overlayTone?: string;
+    overlayAccent?: string;
     alertStyle?: string;
+    alertShowMessage?: boolean;
+    goalStyle?: string;
+    goalShowTitle?: boolean;
+    recentStyle?: string;
+    recentLimit?: number;
+    recentTitle?: string;
   }>(req);
 
   const name = body.name?.trim() ?? user.name;
@@ -38,7 +47,12 @@ export async function PATCH(req: Request) {
   const pageTheme = body.pageTheme?.trim() ?? user.pageTheme;
   const accentColor = body.accentColor?.trim() ?? user.accentColor;
   const background = body.background?.trim() ?? user.background;
+  const overlayTone = body.overlayTone ?? user.overlayTone;
+  const overlayAccent = body.overlayAccent?.trim() ?? user.overlayAccent;
   const alertStyle = body.alertStyle ?? user.alertStyle;
+  const goalStyle = body.goalStyle ?? user.goalStyle;
+  const recentStyle = body.recentStyle ?? user.recentStyle;
+  const recentTitle = (body.recentTitle ?? user.recentTitle).trim().slice(0, 40) || "Останні донати";
 
   if (name.length < 2 || name.length > 40) {
     return jsonError("Імʼя має бути від 2 до 40 символів");
@@ -55,11 +69,14 @@ export async function PATCH(req: Request) {
   if (!isPageThemeId(pageTheme)) {
     return jsonError("Невідомий шаблон сторінки");
   }
-  if (!isHexColor(accentColor) || !isHexColor(background)) {
+  if (!isHexColor(accentColor) || !isHexColor(background) || !isHexColor(overlayAccent)) {
     return jsonError("Колір має бути у форматі #ffffff");
   }
-  if (!STYLES.has(alertStyle)) {
-    return jsonError("Невідомий стиль алерту");
+  if (!isOverlayTone(overlayTone)) {
+    return jsonError("Невідома тема віджетів");
+  }
+  if (!STYLES.has(alertStyle) || !isOverlayStyle(goalStyle) || !isOverlayStyle(recentStyle)) {
+    return jsonError("Невідомий стиль віджета");
   }
 
   if (slug !== user.slug) {
@@ -89,8 +106,16 @@ export async function PATCH(req: Request) {
       showGoal: body.showGoal ?? user.showGoal,
       goalAmount: clamp(Math.round(body.goalAmount ?? user.goalAmount), 0, 100_000_000),
       minAmount: clamp(Math.round(body.minAmount ?? user.minAmount), 100, 1_000_000),
+      overlayTone,
+      overlayAccent,
       overlayDuration: clamp(Math.round(body.overlayDuration ?? user.overlayDuration), 3, 20),
       alertStyle,
+      alertShowMessage: body.alertShowMessage ?? user.alertShowMessage,
+      goalStyle,
+      goalShowTitle: body.goalShowTitle ?? user.goalShowTitle,
+      recentStyle,
+      recentLimit: clamp(Math.round(body.recentLimit ?? user.recentLimit), 1, 12),
+      recentTitle,
     },
   });
 

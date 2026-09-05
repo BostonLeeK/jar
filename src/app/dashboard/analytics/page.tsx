@@ -1,5 +1,7 @@
+import { ClearTestDonations, DeleteTestDonation } from "@/components/test-donations";
 import { Card } from "@/components/ui";
 import { buildDailySeries, parsePeriod, periodSince } from "@/lib/analytics";
+import { isTestDonation } from "@/lib/donations";
 import { formatUah } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/cn";
@@ -37,7 +39,7 @@ export default async function AnalyticsPage({
   const max = Math.max(...series.map((item) => item.value), 1);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Аналітика</h1>
@@ -98,7 +100,10 @@ export default async function AnalyticsPage({
       </Card>
 
       <Card className="p-5">
-        <h2 className="text-sm font-medium">Список за період</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-medium">Список за період</h2>
+          {donations.some((item) => isTestDonation(item.monoTxId)) ? <ClearTestDonations /> : null}
+        </div>
         {donations.length === 0 ? (
           <p className="mt-3 text-sm text-zinc-500">За цей період донатів не було.</p>
         ) : (
@@ -106,14 +111,20 @@ export default async function AnalyticsPage({
             {donations.map((item) => (
               <div key={item.id} className="flex items-center justify-between gap-4 py-3 text-sm">
                 <div className="min-w-0">
-                  <p className="truncate font-medium">{item.nickname}</p>
+                  <p className="truncate font-medium">
+                    {item.nickname}
+                    {isTestDonation(item.monoTxId) ? (
+                      <span className="ml-2 text-xs font-normal text-zinc-400">тест</span>
+                    ) : null}
+                  </p>
                   <p className="truncate text-zinc-500">{item.message || "—"}</p>
                 </div>
-                <div className="shrink-0 text-right">
-                  <p className="font-medium">{formatUah(item.amount)}</p>
-                  <p className="text-xs text-zinc-400">
-                    {item.createdAt.toLocaleDateString("uk-UA")}
-                  </p>
+                <div className="flex shrink-0 items-center gap-3 text-right">
+                  <div>
+                    <p className="font-medium">{formatUah(item.amount)}</p>
+                    <p className="text-xs text-zinc-400">{item.createdAt.toLocaleDateString("uk-UA")}</p>
+                  </div>
+                  {isTestDonation(item.monoTxId) ? <DeleteTestDonation id={item.id} /> : null}
                 </div>
               </div>
             ))}

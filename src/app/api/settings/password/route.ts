@@ -10,14 +10,18 @@ export async function POST(req: Request) {
     return jsonError("Потрібна авторизація", 401);
   }
 
-  const body = await readJson<{ current?: string; next?: string }>(req);
+  const body = await readJson<{ current?: string; next?: string; confirm?: string }>(req);
   const current = body.current ?? "";
   const next = body.next ?? "";
+  const confirm = body.confirm ?? "";
 
   if (next.length < 8) {
     return jsonError("Новий пароль має містити щонайменше 8 символів");
   }
-  if (!(await compare(current, user.passwordHash))) {
+  if (next !== confirm) {
+    return jsonError("Паролі не збігаються");
+  }
+  if (user.passwordHash && !(await compare(current, user.passwordHash))) {
     return jsonError("Поточний пароль невірний", 401);
   }
 

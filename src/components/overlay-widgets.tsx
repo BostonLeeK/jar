@@ -1,8 +1,9 @@
 "use client";
 
 import { formatUah } from "@/lib/money";
+import { overlayPalette } from "@/lib/overlay";
 import { cn } from "@/lib/cn";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 export type OverlayDonation = {
   id: string;
@@ -18,8 +19,16 @@ export type OverlayState = {
   showGoal: boolean;
   raised: number;
   goal: number;
+  overlayTone: string;
+  overlayAccent: string;
   overlayDuration: number;
   alertStyle: string;
+  alertShowMessage: boolean;
+  goalStyle: string;
+  goalShowTitle: boolean;
+  recentStyle: string;
+  recentLimit: number;
+  recentTitle: string;
   donations: OverlayDonation[];
 };
 
@@ -70,35 +79,64 @@ export function useOverlayAlerts(token: string, duration: number) {
   return current;
 }
 
+function Frame({
+  style,
+  tone,
+  className,
+  children,
+}: {
+  style: string;
+  tone: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const palette = overlayPalette(tone);
+  return (
+    <div
+      className={cn(
+        "animate-[fadeIn_0.35s_ease]",
+        style === "banner" && "w-full px-6 py-4",
+        style === "card" && "w-fit rounded-xl border px-6 py-4",
+        style === "minimal" && "px-1 py-1",
+        className,
+      )}
+      style={{
+        color: palette.text,
+        background: style === "minimal" ? "transparent" : palette.surface,
+        borderColor: style === "card" ? palette.border : "transparent",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export function AlertView({
   donation,
-  style,
-  accent,
+  state,
 }: {
   donation: OverlayDonation | null;
-  style: string;
-  accent: string;
+  state: Pick<OverlayState, "overlayTone" | "overlayAccent" | "alertStyle" | "alertShowMessage">;
 }) {
   if (!donation) {
     return null;
   }
-
+  const palette = overlayPalette(state.overlayTone);
   return (
-    <div
-      className={cn(
-        "animate-[fadeIn_0.35s_ease] text-white",
-        style === "banner" && "w-full bg-black/70 px-6 py-4",
-        style === "card" && "mx-auto w-fit rounded-xl border border-white/15 bg-black/75 px-6 py-4",
-        style === "minimal" && "px-4 py-3",
-      )}
-    >
+    <Frame style={state.alertStyle} tone={state.overlayTone}>
       <p className="text-xl font-medium tracking-tight">
-        <span style={{ color: accent }}>{donation.nickname}</span>
-        <span className="mx-2 text-white/40">—</span>
+        <span style={{ color: state.overlayAccent }}>{donation.nickname}</span>
+        <span className="mx-2" style={{ color: palette.dim }}>
+          —
+        </span>
         <span className="font-mono">{formatUah(donation.amount)}</span>
       </p>
-      {donation.message ? <p className="mt-1 text-sm text-white/70">{donation.message}</p> : null}
-    </div>
+      {state.alertShowMessage && donation.message ? (
+        <p className="mt-1 text-sm" style={{ color: palette.muted }}>
+          {donation.message}
+        </p>
+      ) : null}
+    </Frame>
   );
 }
 
@@ -107,37 +145,52 @@ export function GoalView({ state }: { state: OverlayState }) {
     return null;
   }
   const progress = Math.min(100, Math.round((state.raised / state.goal) * 100));
+  const palette = overlayPalette(state.overlayTone);
   return (
-    <div className="w-[440px] text-white">
-      <div className="mb-2 flex items-baseline justify-between text-sm">
-        <span className="font-medium">{state.name}</span>
-        <span className="font-mono text-white/80">
+    <Frame style={state.goalStyle} tone={state.overlayTone} className="w-[440px] max-w-full">
+      {state.goalShowTitle ? (
+        <div className="mb-2 flex items-baseline justify-between text-sm">
+          <span className="font-medium">{state.name}</span>
+          <span className="font-mono" style={{ color: palette.muted }}>
+            {formatUah(state.raised)} / {formatUah(state.goal)}
+          </span>
+        </div>
+      ) : (
+        <div className="mb-2 text-right font-mono text-sm" style={{ color: palette.muted }}>
           {formatUah(state.raised)} / {formatUah(state.goal)}
-        </span>
+        </div>
+      )}
+      <div className="h-2 overflow-hidden rounded-full" style={{ background: palette.track }}>
+        <div className="h-full rounded-full" style={{ width: `${progress}%`, background: state.overlayAccent }} />
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-white/15">
-        <div className="h-full rounded-full" style={{ width: `${progress}%`, background: state.accentColor }} />
-      </div>
-    </div>
+    </Frame>
   );
 }
 
 export function RecentView({ state }: { state: OverlayState }) {
+  const palette = overlayPalette(state.overlayTone);
+  const items = state.donations.slice(0, Math.max(1, state.recentLimit));
   return (
-    <div className="w-[320px] text-white">
-      <p className="mb-2 text-xs uppercase tracking-[0.16em] text-white/50">Останні донати</p>
+    <Frame style={state.recentStyle} tone={state.overlayTone} className="w-[320px] max-w-full">
+      <p className="mb-2 text-xs uppercase tracking-[0.16em]" style={{ color: palette.dim }}>
+        {state.recentTitle || "Останні донати"}
+      </p>
       <ul className="space-y-2">
-        {state.donations.length === 0 ? (
-          <li className="text-sm text-white/40">Поки тихо</li>
+        {items.length === 0 ? (
+          <li className="text-sm" style={{ color: palette.dim }}>
+            Поки тихо
+          </li>
         ) : (
-          state.donations.slice(0, 6).map((item) => (
+          items.map((item) => (
             <li key={item.id} className="flex items-baseline justify-between gap-3 text-sm">
               <span className="truncate">{item.nickname}</span>
-              <span className="font-mono text-white/80">{formatUah(item.amount)}</span>
+              <span className="font-mono" style={{ color: palette.muted }}>
+                {formatUah(item.amount)}
+              </span>
             </li>
           ))
         )}
       </ul>
-    </div>
+    </Frame>
   );
 }

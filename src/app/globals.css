@@ -20,6 +20,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html,
 body {
   background: var(--background);
@@ -34,6 +38,21 @@ body {
 ::selection {
   background: #111827;
   color: #fff;
+}
+
+button:not(:disabled),
+[type="button"]:not(:disabled),
+[type="submit"]:not(:disabled),
+[type="checkbox"],
+select,
+a {
+  cursor: pointer;
+}
+
+button:disabled,
+[type="button"]:disabled,
+[type="submit"]:disabled {
+  cursor: not-allowed;
 }
 
 .obs-root,

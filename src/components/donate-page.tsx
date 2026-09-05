@@ -14,7 +14,7 @@ export function DonatePageView({
   title,
   bio,
   twitchLogin,
-  twitchAvatar,
+  avatar,
   showGoal,
   raised,
   goal,
@@ -28,7 +28,7 @@ export function DonatePageView({
   title: string;
   bio: string;
   twitchLogin: string | null;
-  twitchAvatar: string | null;
+  avatar: string | null;
   showGoal: boolean;
   raised: number;
   goal: number;
@@ -44,15 +44,20 @@ export function DonatePageView({
 
   return (
     <div
-      className={cn("relative min-h-full overflow-hidden", preview ? "min-h-[640px]" : "min-h-dvh")}
+      className={cn("relative w-full overflow-x-hidden", preview ? "min-h-[640px]" : "min-h-dvh")}
       style={{ background: theme.background, color: theme.text }}
     >
+      {preview ? null : (
+        <style>{`html,body{background:${theme.background}!important;min-height:100dvh;}`}</style>
+      )}
       {theme.glow !== "none" ? (
         <div className="pointer-events-none absolute inset-0" style={{ background: theme.glow }} />
       ) : null}
       <div
         className={cn(
           "relative mx-auto flex w-full max-w-5xl flex-col px-5 py-10",
+          !preview && "min-h-dvh",
+          !preview && !cover && "justify-center",
           cover && "pt-0",
           split && "md:grid md:grid-cols-[0.9fr_1.1fr] md:items-center md:gap-16 md:py-20",
         )}
@@ -60,9 +65,9 @@ export function DonatePageView({
         {cover ? <div className="h-40 w-full" style={{ background: theme.glow }} /> : null}
         <header className={cn(cover && "-mt-10", split && "md:sticky md:top-20")}>
           <div className="flex items-center gap-4">
-            {twitchAvatar ? (
+            {avatar ? (
               <img
-                src={twitchAvatar}
+                src={avatar}
                 alt=""
                 className="h-16 w-16 object-cover"
                 style={{ borderRadius: theme.id === "mono" ? "0" : "999px", border: `1px solid ${theme.border}` }}
