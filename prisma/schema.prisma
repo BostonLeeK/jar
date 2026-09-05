@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  slug         String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  monoTokenEnc   String?
+  monoJarId      String?
+  monoSendId     String?
+  monoJarTitle   String?
+  monoJarBalance Int     @default(0)
+  monoJarGoal    Int     @default(0)
+  monoWebhookSet Boolean @default(false)
+
+  twitchId          String?
+  twitchLogin       String?
+  twitchDisplayName String?
+  twitchAvatar      String?
+
+  pageTitle       String  @default("")
+  pageBio         String  @default("")
+  accentColor     String  @default("#ffffff")
+  background      String  @default("#000000")
+  showGoal        Boolean @default(true)
+  goalAmount      Int     @default(0)
+  minAmount       Int     @default(1000)
+  overlayToken    String  @unique @default(cuid())
+  webhookToken    String  @unique @default(cuid())
+  overlayDuration Int     @default(8)
+  alertStyle      String  @default("minimal")
+
+  donations Donation[]
+  pending   PendingDonation[]
+}
+
+model Donation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  monoTxId  String
+  amount    Int
+  nickname  String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, monoTxId])
+  @@index([userId, createdAt])
+}
+
+model PendingDonation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  nickname  String
+  message   String
+  code      String
+  matched   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId, matched, amount])
+  @@index([userId, code])
+}
