@@ -57,9 +57,10 @@ model User {
   alertTts          Boolean @default(false)
   pageViews         Int     @default(0)
 
-  donations  Donation[]
-  pending    PendingDonation[]
-  alertTiers AlertTier[]
+  donations    Donation[]
+  pending      PendingDonation[]
+  alertTiers   AlertTier[]
+  twitchAlerts TwitchAlert[]
 }
 
 model Donation {
@@ -87,6 +88,19 @@ model AlertTier {
   createdAt DateTime @default(now())
 
   @@index([userId, minAmount])
+}
+
+model TwitchAlert {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  gifUrl    String?
+  audioUrl  String?
+  tts       Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, kind])
 }
 
 model PendingDonation {

@@ -1,5 +1,6 @@
 import { jsonError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
+import { ensureTwitchAlerts, toTwitchAlertConfig } from "@/lib/twitch-alerts";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -23,6 +24,7 @@ export async function GET(
     return jsonError("Not found", 404);
   }
 
+  const twitchAlerts = await ensureTwitchAlerts(user.id);
   const raised = user.goalAmount > 0 ? user.monoJarBalance : user.donations.reduce((sum, item) => sum + item.amount, 0);
   const goal = user.goalAmount || user.monoJarGoal;
 
@@ -50,6 +52,7 @@ export async function GET(
       audioUrl: tier.audioUrl,
       tts: tier.tts,
     })),
+    twitchAlerts: twitchAlerts.map(toTwitchAlertConfig),
     donations: user.donations.map((item) => ({
       id: item.id,
       amount: item.amount,

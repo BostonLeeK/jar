@@ -15,31 +15,57 @@ export async function GET(
   }
 
   const encoder = new TextEncoder();
+  let cleanup = () => undefined;
   const stream = new ReadableStream({
     start(controller) {
+      let closed = false;
+      let off = () => undefined;
+      let ping: ReturnType<typeof setInterval> | undefined;
       const send = (payload: unknown) => {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+        if (closed) {
+          return;
+        }
+        try {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+        } catch {
+          cleanup();
+        }
       };
-      send({ type: "ready" });
-      const off = onDonation(user.id, (donation) => {
+      cleanup = () => {
+        if (closed) {
+          return;
+        }
+        closed = true;
+        off();
+        if (ping) {
+          clearInterval(ping);
+        }
+        try {
+          controller.close();
+        } catch {
+          return;
+        }
+      };
+      off = onDonation(user.id, (donation) => {
         send({ type: "donation", ...donation });
       });
-      const ping = setInterval(() => {
-        controller.enqueue(encoder.encode(`: ping\n\n`));
-      }, 15000);
-      req.signal.addEventListener("abort", () => {
-        off();
-        clearInterval(ping);
-        controller.close();
-      });
+      ping = setInterval(() => {
+        send({ type: "ping" });
+      }, 10000);
+      send({ type: "ready" });
+      req.signal.addEventListener("abort", cleanup);
+    },
+    cancel() {
+      cleanup();
     },
   });
 
   return new Response(stream, {
     headers: {
-      "Content-Type": "text/event-stream",
+      "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
     },
   });
 }

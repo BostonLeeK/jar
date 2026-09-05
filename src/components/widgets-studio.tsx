@@ -1,11 +1,12 @@
 "use client";
 
 import { AlertTiersEditor } from "@/components/alert-tiers-editor";
+import { TwitchAlertsEditor } from "@/components/twitch-alerts-editor";
 import { WidgetPreviews } from "@/components/widget-previews";
 import { WidgetsPanel } from "@/components/widgets-panel";
 import { Button, Card, FieldError, Input, Label } from "@/components/ui";
 import type { OverlayDonation, OverlayState } from "@/components/overlay-widgets";
-import type { AlertTierConfig } from "@/lib/overlay";
+import type { AlertTierConfig, TwitchAlertConfig } from "@/lib/overlay";
 import { cn } from "@/lib/cn";
 import { useMemo, useState, type FormEvent } from "react";
 
@@ -30,6 +31,7 @@ export function WidgetsStudio({
   recentTitle,
   alertTts,
   alertTiers,
+  twitchAlerts,
   donations,
 }: {
   token: string;
@@ -49,6 +51,7 @@ export function WidgetsStudio({
   recentTitle: string;
   alertTts: boolean;
   alertTiers: AlertTierConfig[];
+  twitchAlerts: TwitchAlertConfig[];
   donations: OverlayDonation[];
 }) {
   const [tone, setTone] = useState(overlayTone);
@@ -62,6 +65,7 @@ export function WidgetsStudio({
   const [limit, setLimit] = useState(String(recentLimit));
   const [title, setTitle] = useState(recentTitle);
   const [tiers, setTiers] = useState(alertTiers);
+  const [twitch, setTwitch] = useState(twitchAlerts);
   const [backdrop, setBackdrop] = useState<"dark" | "light">("dark");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,9 +90,10 @@ export function WidgetsStudio({
       recentTitle: title,
       alertTts,
       alertTiers: tiers,
+      twitchAlerts: twitch,
       donations,
     }),
-    [accent, alert, alertTts, donations, duration, goal, goalLook, limit, name, raised, recentLook, showMessage, showTitle, tiers, title, tone],
+    [accent, alert, alertTts, donations, duration, goal, goalLook, limit, name, raised, recentLook, showMessage, showTitle, tiers, title, tone, twitch],
   );
 
   async function save(event: FormEvent) {
@@ -242,6 +247,7 @@ export function WidgetsStudio({
       </form>
 
       <AlertTiersEditor initialTiers={alertTiers} initialTts={alertTts} onTiersChange={setTiers} />
+      <TwitchAlertsEditor initialAlerts={twitchAlerts} onChange={setTwitch} />
 
       <div className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">

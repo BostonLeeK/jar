@@ -20,15 +20,27 @@ export type AlertTierConfig = {
   tts: boolean;
 };
 
+export type TwitchAlertConfig = {
+  id: string;
+  kind: string;
+  gifUrl: string | null;
+  audioUrl: string | null;
+  tts: boolean;
+};
+
 export function pickAlertTier(tiers: AlertTierConfig[], amount: number) {
   return [...tiers]
     .filter((tier) => amount >= tier.minAmount)
     .sort((a, b) => b.minAmount - a.minAmount)[0] ?? null;
 }
 
-export function pickAlertVisual(tiers: AlertTierConfig[], alert: { kind?: string; amount: number }) {
+export function pickAlertVisual(
+  tiers: AlertTierConfig[],
+  alert: { kind?: string; amount: number },
+  twitchAlerts: TwitchAlertConfig[] = [],
+) {
   if (alert.kind && alert.kind !== "donation") {
-    return [...tiers].sort((a, b) => a.minAmount - b.minAmount)[0] ?? null;
+    return twitchAlerts.find((item) => item.kind === alert.kind) ?? null;
   }
   return pickAlertTier(tiers, alert.amount);
 }

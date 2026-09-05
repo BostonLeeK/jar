@@ -1,11 +1,12 @@
 import { WidgetsStudio } from "@/components/widgets-studio";
 import { prisma } from "@/lib/prisma";
+import { ensureTwitchAlerts, toTwitchAlertConfig } from "@/lib/twitch-alerts";
 import { getAppUrl } from "@/lib/urls";
 import { requireUser } from "@/lib/user";
 
 export default async function WidgetsPage() {
   const user = await requireUser();
-  const [donations, alertTiers] = await Promise.all([
+  const [donations, alertTiers, twitchAlerts] = await Promise.all([
     prisma.donation.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
@@ -15,6 +16,7 @@ export default async function WidgetsPage() {
       where: { userId: user.id },
       orderBy: { minAmount: "asc" },
     }),
+    ensureTwitchAlerts(user.id),
   ]);
 
   return (
@@ -47,6 +49,7 @@ export default async function WidgetsPage() {
           audioUrl: tier.audioUrl,
           tts: tier.tts,
         }))}
+        twitchAlerts={twitchAlerts.map(toTwitchAlertConfig)}
         donations={donations.map((item) => ({
           id: item.id,
           amount: item.amount,

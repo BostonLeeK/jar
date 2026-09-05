@@ -79,8 +79,8 @@ export function WidgetsPanel({
         <ol className="mt-3 space-y-2 text-sm text-zinc-500">
           <li>1. Sources → Browser</li>
           <li>2. Встав URL віджета</li>
-          <li>3. Увімкни Shutdown source when not visible</li>
-          <li>4. Refresh browser when scene becomes active</li>
+          <li>3. Refresh browser when scene becomes active — увімкни</li>
+          <li>4. Shutdown source when not visible можна лишити вимкненим, якщо алерти зникають</li>
           <li>5. Custom CSS можна лишити порожнім</li>
         </ol>
       </Card>

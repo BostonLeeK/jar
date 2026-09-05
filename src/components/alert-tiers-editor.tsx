@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertFileSlot } from "@/components/alert-file-slot";
 import { Button, Card, Input, Label } from "@/components/ui";
 import { kopiykyToUah, uahToKopiyky } from "@/lib/money";
 import type { AlertTierConfig } from "@/lib/overlay";
@@ -133,7 +134,7 @@ export function AlertTiersEditor({
                   }}
                 />
               </div>
-              <FileSlot
+              <AlertFileSlot
                 label="Гіфка"
                 accept="image/gif,image/webp,image/png"
                 preview={tier.gifUrl}
@@ -142,7 +143,7 @@ export function AlertTiersEditor({
                 onFile={(file) => void upload(tier.id, "gif", file)}
                 onClear={tier.gifUrl ? () => void clearFile(tier.id, "gif") : undefined}
               />
-              <FileSlot
+              <AlertFileSlot
                 label="Аудіо"
                 accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg"
                 hint={tier.audioUrl ? "Файл є · замінити" : "MP3 / WAV / OGG"}
@@ -169,55 +170,5 @@ export function AlertTiersEditor({
       )}
       {error ? <p className="text-sm text-red-500">{error}</p> : null}
     </Card>
-  );
-}
-
-function FileSlot({
-  label,
-  accept,
-  preview,
-  hint,
-  disabled,
-  onFile,
-  onClear,
-}: {
-  label: string;
-  accept: string;
-  preview?: string | null;
-  hint: string;
-  disabled?: boolean;
-  onFile: (file: File) => void;
-  onClear?: () => void;
-}) {
-  return (
-    <div>
-      <Label>{label}</Label>
-      <div className="flex items-center gap-2">
-        {preview ? (
-          <img src={preview} alt="" className="h-10 w-10 rounded-lg object-cover" />
-        ) : null}
-        <label className="inline-flex h-10 cursor-pointer items-center rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-600 hover:bg-zinc-50">
-          {hint}
-          <input
-            type="file"
-            accept={accept}
-            className="hidden"
-            disabled={disabled}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              event.target.value = "";
-              if (file) {
-                onFile(file);
-              }
-            }}
-          />
-        </label>
-        {onClear ? (
-          <button type="button" onClick={onClear} className="text-xs text-zinc-400 hover:text-red-600">
-            ×
-          </button>
-        ) : null}
-      </div>
-    </div>
   );
 }

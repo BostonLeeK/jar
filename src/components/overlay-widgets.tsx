@@ -2,7 +2,7 @@
 
 import { formatAlertDetail, type AlertKind } from "@/lib/alerts";
 import { formatUah } from "@/lib/money";
-import { overlayPalette, pickAlertVisual, type AlertTierConfig } from "@/lib/overlay";
+import { overlayPalette, pickAlertVisual, type AlertTierConfig, type TwitchAlertConfig } from "@/lib/overlay";
 import { cn } from "@/lib/cn";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
@@ -33,6 +33,7 @@ export type OverlayState = {
   recentTitle: string;
   alertTts: boolean;
   alertTiers: AlertTierConfig[];
+  twitchAlerts: TwitchAlertConfig[];
   donations: OverlayDonation[];
 };
 
@@ -61,24 +62,65 @@ export function useOverlayState(token: string) {
 
 export function useOverlayAlerts(token: string, duration: number) {
   const [current, setCurrent] = useState<OverlayDonation | null>(null);
+  const durationRef = useRef(duration);
+  durationRef.current = duration;
 
   useEffect(() => {
-    const source = new EventSource(`/api/overlay/${token}/stream`);
+    let source: EventSource | null = null;
     let hide: number | undefined;
-    source.onmessage = (event) => {
-      const payload = JSON.parse(event.data) as { type: string } & OverlayDonation;
-      if (payload.type !== "donation" && payload.type !== "alert") {
+    let watchdog: number | undefined;
+    let reconnect: number | undefined;
+    let stopped = false;
+
+    function arm() {
+      window.clearTimeout(watchdog);
+      watchdog = window.setTimeout(connect, 40000);
+    }
+
+    function connect() {
+      window.clearTimeout(reconnect);
+      source?.close();
+      if (stopped) {
         return;
       }
-      setCurrent(payload);
-      window.clearTimeout(hide);
-      hide = window.setTimeout(() => setCurrent(null), duration * 1000);
+      source = new EventSource(`/api/overlay/${token}/stream`);
+      source.onopen = arm;
+      source.onmessage = (event) => {
+        arm();
+        const payload = JSON.parse(event.data) as { type: string } & OverlayDonation;
+        if (payload.type !== "donation" && payload.type !== "alert") {
+          return;
+        }
+        setCurrent(payload);
+        window.clearTimeout(hide);
+        hide = window.setTimeout(() => setCurrent(null), durationRef.current * 1000);
+      };
+      source.onerror = () => {
+        source?.close();
+        if (!stopped) {
+          window.clearTimeout(reconnect);
+          reconnect = window.setTimeout(connect, 1500);
+        }
+      };
+      arm();
+    }
+
+    connect();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        connect();
+      }
     };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
-      source.close();
+      stopped = true;
+      source?.close();
       window.clearTimeout(hide);
+      window.clearTimeout(watchdog);
+      window.clearTimeout(reconnect);
+      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [token, duration]);
+  }, [token]);
 
   return current;
 }
@@ -109,7 +151,7 @@ export function useAlertEffects(donation: OverlayDonation | null, state: Overlay
     if (!donation || !current) {
       return;
     }
-    const tier = pickAlertVisual(current.alertTiers, donation);
+    const tier = pickAlertVisual(current.alertTiers, donation, current.twitchAlerts);
     const spoken = donation.message.trim() || `${donation.nickname} ${formatAlertDetail(donation)}`;
     const shouldSpeak = current.alertTts && (tier ? tier.tts : true) && Boolean(spoken);
     let audio: HTMLAudioElement | null = null;
@@ -181,7 +223,7 @@ export function AlertView({
     return null;
   }
   const palette = overlayPalette(state.overlayTone);
-  const tier = pickAlertVisual(state.alertTiers, donation);
+  const tier = pickAlertVisual(state.alertTiers, donation, state.twitchAlerts);
   return (
     <Frame style={state.alertStyle} tone={state.overlayTone} className="max-w-full">
       {tier?.gifUrl ? (
