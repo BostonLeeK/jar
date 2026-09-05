@@ -79,12 +79,18 @@ export function IconHelp(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-export function LogoMark({ className }: { className?: string }) {
+export function LogoMark({
+  className,
+  tone = "light",
+}: {
+  className?: string;
+  tone?: "light" | "dark";
+}) {
   return (
     <img
       src="/jar-logo.png"
       alt="jar"
-      className={cn("h-8 w-auto invert mix-blend-multiply", className)}
+      className={cn("h-8 w-auto", tone === "light" && "invert mix-blend-multiply", className)}
     />
   );
 }

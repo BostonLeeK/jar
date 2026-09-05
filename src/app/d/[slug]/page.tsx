@@ -1,6 +1,7 @@
 import { DonatePageView } from "@/components/donate-page";
 import { getPageTheme } from "@/lib/themes";
 import { prisma } from "@/lib/prisma";
+import { resolveSocial } from "@/lib/social";
 import { pageAvatar } from "@/lib/user";
 import { notFound } from "next/navigation";
 
@@ -15,8 +16,9 @@ export default async function DonatePage({
     include: {
       donations: {
         orderBy: { createdAt: "desc" },
-        take: 3,
+        take: 8,
       },
+      _count: { select: { donations: true } },
     },
   });
   if (!user) {
@@ -34,6 +36,7 @@ export default async function DonatePage({
       bio={user.pageBio}
       twitchLogin={user.twitchLogin}
       avatar={pageAvatar(user)}
+      cover={user.pageCoverUrl}
       showGoal={user.showGoal}
       raised={user.monoJarBalance}
       goal={user.goalAmount || user.monoJarGoal}
@@ -45,11 +48,13 @@ export default async function DonatePage({
         nickname: item.nickname,
         amount: item.amount,
       }))}
+      recentCount={user._count.donations}
       custom={{
         enabled: user.pageUseCustom,
         html: user.pageCustomHtml,
         css: user.pageCustomCss,
       }}
+      social={resolveSocial(user)}
     />
   );
 }

@@ -2,7 +2,7 @@ import { mkdir, readdir, unlink, writeFile } from "fs/promises";
 import path from "path";
 
 const DIR = path.join(process.cwd(), "public", "uploads", "alerts");
-const GIF_MAX = 8 * 1024 * 1024;
+const GIF_MAX = 10 * 1024 * 1024;
 const AUDIO_MAX = 4 * 1024 * 1024;
 const GIF_TYPES: Record<string, string> = {
   "image/gif": "gif",

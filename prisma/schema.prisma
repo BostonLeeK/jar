@@ -33,6 +33,13 @@ model User {
   twitchRefreshEnc  String?
   twitchEventSub    Boolean @default(false)
   avatarUrl         String?
+  pageCoverUrl      String?
+  socialTwitch      String  @default("")
+  socialYoutube     String  @default("")
+  socialDiscord     String  @default("")
+  socialInstagram   String  @default("")
+  socialTiktok      String  @default("")
+  socialX           String  @default("")
 
   pageTitle       String  @default("")
   pageBio         String  @default("")

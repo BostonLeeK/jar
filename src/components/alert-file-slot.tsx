@@ -1,4 +1,5 @@
 import { Label } from "@/components/ui";
+import { UploadBar } from "@/components/upload-bar";
 
 export function AlertFileSlot({
   label,
@@ -6,6 +7,7 @@ export function AlertFileSlot({
   preview,
   hint,
   disabled,
+  progress,
   onFile,
   onClear,
 }: {
@@ -14,6 +16,7 @@ export function AlertFileSlot({
   preview?: string | null;
   hint: string;
   disabled?: boolean;
+  progress?: number | null;
   onFile: (file: File) => void;
   onClear?: () => void;
 }) {
@@ -23,7 +26,7 @@ export function AlertFileSlot({
       <div className="flex items-center gap-2">
         {preview ? <img src={preview} alt="" className="h-10 w-10 rounded-lg object-cover" /> : null}
         <label className="inline-flex h-10 cursor-pointer items-center rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-600 hover:bg-zinc-50">
-          {hint}
+          {progress != null ? `${progress}%` : hint}
           <input
             type="file"
             accept={accept}
@@ -44,6 +47,7 @@ export function AlertFileSlot({
           </button>
         ) : null}
       </div>
+      {progress != null ? <div className="mt-2"><UploadBar value={progress} /></div> : null}
     </div>
   );
 }

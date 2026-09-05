@@ -1,4 +1,4 @@
-import { isAllowedAvatar, removeAvatarFiles, saveAvatarFile } from "@/lib/avatar";
+import { isAllowedCover, removeCoverFiles, saveCoverFile } from "@/lib/cover";
 import { jsonError } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { requireApiUser } from "@/lib/user";
@@ -10,16 +10,16 @@ export async function POST(req: Request) {
     return jsonError("Потрібна авторизація", 401);
   }
   const form = await req.formData();
-  const file = form.get("avatar");
-  if (!(file instanceof File) || !isAllowedAvatar(file)) {
-    return jsonError("Завантаж JPG, PNG або WEBP до 10 МБ");
+  const file = form.get("cover");
+  if (!(file instanceof File) || !isAllowedCover(file)) {
+    return jsonError("Завантаж JPG, PNG або WEBP до 15 МБ");
   }
-  const avatarUrl = await saveAvatarFile(user.id, file);
+  const pageCoverUrl = await saveCoverFile(user.id, file);
   await prisma.user.update({
     where: { id: user.id },
-    data: { avatarUrl },
+    data: { pageCoverUrl },
   });
-  return NextResponse.json({ avatarUrl });
+  return NextResponse.json({ pageCoverUrl });
 }
 
 export async function DELETE() {
@@ -27,10 +27,10 @@ export async function DELETE() {
   if (!user) {
     return jsonError("Потрібна авторизація", 401);
   }
-  await removeAvatarFiles(user.id);
+  await removeCoverFiles(user.id);
   await prisma.user.update({
     where: { id: user.id },
-    data: { avatarUrl: null },
+    data: { pageCoverUrl: null },
   });
   return NextResponse.json({ ok: true });
 }

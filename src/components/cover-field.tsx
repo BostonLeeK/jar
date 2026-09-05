@@ -6,21 +6,16 @@ import { uploadForm } from "@/lib/upload";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-export function AvatarField({
-  avatar,
-  fallback,
-  name,
+export function CoverField({
+  cover,
   onChange,
 }: {
-  avatar: string | null;
-  fallback?: string | null;
-  name: string;
+  cover: string | null;
   onChange?: (url: string | null) => void;
 }) {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
-  const [custom, setCustom] = useState(avatar);
-  const current = custom || fallback || null;
+  const [current, setCurrent] = useState(cover);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -32,25 +27,25 @@ export function AvatarField({
     setProgress(1);
     setFileName(file.name);
     setError(null);
-    setCustom(local);
+    setCurrent(local);
     onChange?.(local);
     try {
       const body = new FormData();
-      body.set("avatar", file);
-      const res = await uploadForm("/api/settings/avatar", body, setProgress);
-      const data = (await res.json()) as { avatarUrl?: string; error?: string };
-      if (!res.ok || !data.avatarUrl) {
-        setCustom(avatar);
-        onChange?.(avatar || fallback || null);
+      body.set("cover", file);
+      const res = await uploadForm("/api/settings/cover", body, setProgress);
+      const data = (await res.json()) as { pageCoverUrl?: string; error?: string };
+      if (!res.ok || !data.pageCoverUrl) {
+        setCurrent(cover);
+        onChange?.(cover);
         setError(data.error || "Не вдалося завантажити");
         return;
       }
-      setCustom(data.avatarUrl);
-      onChange?.(data.avatarUrl);
+      setCurrent(data.pageCoverUrl);
+      onChange?.(data.pageCoverUrl);
       router.refresh();
     } catch {
-      setCustom(avatar);
-      onChange?.(avatar || fallback || null);
+      setCurrent(cover);
+      onChange?.(cover);
       setError("Не вдалося завантажити");
     } finally {
       URL.revokeObjectURL(local);
@@ -63,47 +58,48 @@ export function AvatarField({
   async function remove() {
     setPending(true);
     setError(null);
-    const res = await fetch("/api/settings/avatar", { method: "DELETE" });
+    const res = await fetch("/api/settings/cover", { method: "DELETE" });
     setPending(false);
     if (!res.ok) {
       setError("Не вдалося видалити");
       return;
     }
-    setCustom(null);
-    onChange?.(fallback ?? null);
+    setCurrent(null);
+    onChange?.(null);
     router.refresh();
   }
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="space-y-3">
       <button
         type="button"
         onClick={() => input.current?.click()}
-        className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-zinc-200 bg-zinc-100 transition-all duration-150 hover:-translate-y-px hover:shadow-sm"
         disabled={pending}
+        className="relative h-28 w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100 transition-all duration-150 hover:-translate-y-px hover:shadow-sm"
       >
         {current ? (
           <img src={current} alt="" className="h-full w-full object-cover" />
         ) : (
-          <span className="text-lg font-semibold text-zinc-500">{name.slice(0, 1).toUpperCase()}</span>
+          <span className="text-sm text-zinc-500">Своє фото праворуч на картці</span>
         )}
-        {pending ? <span className="absolute inset-0 bg-white/55" /> : null}
+        {pending ? (
+          <span className="absolute inset-x-0 bottom-0 bg-white/80 px-3 py-2">
+            <UploadBar value={progress} name={fileName} />
+          </span>
+        ) : null}
       </button>
-      <div className="min-w-0 flex-1 space-y-2">
-        <p className="text-sm text-zinc-500">JPG, PNG або WEBP, до 10 МБ. Якщо Twitch не підключений — це аватар на сторінці.</p>
-        {pending ? <UploadBar value={progress} name={fileName} /> : null}
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="secondary" onClick={() => input.current?.click()} disabled={pending}>
-            {pending ? `${progress}%` : "Завантажити"}
+      <p className="text-sm text-zinc-500">JPG, PNG або WEBP, до 15 МБ. Лігше читатиметься текст, якщо обличчя чи краєвид справа.</p>
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" variant="secondary" onClick={() => input.current?.click()} disabled={pending}>
+          {pending ? `${progress}%` : "Завантажити фон"}
+        </Button>
+        {current ? (
+          <Button type="button" variant="ghost" onClick={remove} disabled={pending}>
+            Прибрати
           </Button>
-          {custom ? (
-            <Button type="button" variant="ghost" onClick={remove} disabled={pending}>
-              Прибрати
-            </Button>
-          ) : null}
-        </div>
-        <FieldError>{error}</FieldError>
+        ) : null}
       </div>
+      <FieldError>{error}</FieldError>
       <input
         ref={input}
         type="file"

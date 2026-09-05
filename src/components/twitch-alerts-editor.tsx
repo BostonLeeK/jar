@@ -4,6 +4,7 @@ import { AlertFileSlot } from "@/components/alert-file-slot";
 import { Card } from "@/components/ui";
 import type { TwitchAlertConfig } from "@/lib/overlay";
 import { TWITCH_ALERT_LABELS, isTwitchAlertKind } from "@/lib/twitch-alerts";
+import { uploadForm } from "@/lib/upload";
 import { useState } from "react";
 
 export function TwitchAlertsEditor({
@@ -15,6 +16,7 @@ export function TwitchAlertsEditor({
 }) {
   const [alerts, setAlerts] = useState(initialAlerts);
   const [pending, setPending] = useState(false);
+  const [progress, setProgress] = useState<{ key: string; value: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function commit(next: TwitchAlertConfig[]) {
@@ -32,20 +34,28 @@ export function TwitchAlertsEditor({
   }
 
   async function upload(id: string, kind: "gif" | "audio", file: File) {
+    const key = `${id}:${kind}`;
     setPending(true);
+    setProgress({ key, value: 1 });
     setError(null);
     const body = new FormData();
     body.set("id", id);
     body.set("kind", kind);
     body.set("file", file);
-    const res = await fetch("/api/settings/twitch-alerts/file", { method: "POST", body });
-    const data = (await res.json()) as TwitchAlertConfig & { error?: string };
-    setPending(false);
-    if (!res.ok) {
-      setError(data.error || "Не вдалося завантажити");
-      return;
+    try {
+      const res = await uploadForm("/api/settings/twitch-alerts/file", body, (value) => setProgress({ key, value }));
+      const data = (await res.json()) as TwitchAlertConfig & { error?: string };
+      if (!res.ok) {
+        setError(data.error || "Не вдалося завантажити");
+        return;
+      }
+      commit(alerts.map((item) => (item.id === id ? data : item)));
+    } catch {
+      setError("Не вдалося завантажити");
+    } finally {
+      setPending(false);
+      setProgress(null);
     }
-    commit(alerts.map((item) => (item.id === id ? data : item)));
   }
 
   async function clearFile(id: string, kind: "gif" | "audio") {
@@ -77,6 +87,7 @@ export function TwitchAlertsEditor({
               preview={item.gifUrl}
               hint={item.gifUrl ? "Замінити" : "GIF / WEBP"}
               disabled={pending}
+              progress={progress?.key === `${item.id}:gif` ? progress.value : null}
               onFile={(file) => void upload(item.id, "gif", file)}
               onClear={item.gifUrl ? () => void clearFile(item.id, "gif") : undefined}
             />
@@ -85,6 +96,7 @@ export function TwitchAlertsEditor({
               accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg"
               hint={item.audioUrl ? "Файл є · замінити" : "MP3 / WAV / OGG"}
               disabled={pending}
+              progress={progress?.key === `${item.id}:audio` ? progress.value : null}
               onFile={(file) => void upload(item.id, "audio", file)}
               onClear={item.audioUrl ? () => void clearFile(item.id, "audio") : undefined}
             />

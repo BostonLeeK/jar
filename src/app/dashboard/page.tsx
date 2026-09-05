@@ -5,6 +5,7 @@ import { TestDonateForm } from "@/components/widgets-panel";
 import { isTestDonation } from "@/lib/donations";
 import { formatUah } from "@/lib/money";
 import { prisma } from "@/lib/prisma";
+import { resolveSocial } from "@/lib/social";
 import { donatePath, getAppUrl } from "@/lib/urls";
 import { pageAvatar, requireUser, toSafeUser } from "@/lib/user";
 import Link from "next/link";
@@ -130,6 +131,7 @@ export default async function DashboardPage() {
           goal={goal}
           twitchLogin={user.twitchLogin}
           avatar={pageAvatar(user)}
+          cover={user.pageCoverUrl}
           slug={user.slug}
           minAmount={user.minAmount}
           ready={Boolean(user.monoSendId)}
@@ -143,6 +145,7 @@ export default async function DashboardPage() {
             html: user.pageCustomHtml,
             css: user.pageCustomCss,
           }}
+          social={resolveSocial(user)}
         />
         <Card className="p-4">
           <p className="text-sm font-medium">Поділитись сторінкою</p>

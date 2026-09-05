@@ -1,24 +1,24 @@
 import { mkdir, readdir, unlink, writeFile } from "fs/promises";
 import path from "path";
 
-const DIR = path.join(process.cwd(), "public", "uploads", "avatars");
-const MAX_BYTES = 10 * 1024 * 1024;
+const DIR = path.join(process.cwd(), "public", "uploads", "covers");
+const MAX_BYTES = 15 * 1024 * 1024;
 const TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
 };
 
-export function avatarExt(type: string) {
+export function coverExt(type: string) {
   return TYPES[type] ?? null;
 }
 
-export function isAllowedAvatar(file: File) {
-  return Boolean(avatarExt(file.type)) && file.size > 0 && file.size <= MAX_BYTES;
+export function isAllowedCover(file: File) {
+  return Boolean(coverExt(file.type)) && file.size > 0 && file.size <= MAX_BYTES;
 }
 
-export async function saveAvatarFile(userId: string, file: File) {
-  const ext = avatarExt(file.type);
+export async function saveCoverFile(userId: string, file: File) {
+  const ext = coverExt(file.type);
   if (!ext) {
     throw new Error("Непідтримуваний формат");
   }
@@ -31,10 +31,10 @@ export async function saveAvatarFile(userId: string, file: File) {
   );
   const filename = `${userId}.${ext}`;
   await writeFile(path.join(DIR, filename), Buffer.from(await file.arrayBuffer()));
-  return `/uploads/avatars/${filename}?t=${Date.now()}`;
+  return `/uploads/covers/${filename}?t=${Date.now()}`;
 }
 
-export async function removeAvatarFiles(userId: string) {
+export async function removeCoverFiles(userId: string) {
   const files = await readdir(DIR).catch(() => [] as string[]);
   await Promise.all(
     files

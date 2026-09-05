@@ -33,6 +33,7 @@ export function DonateForm({
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [open, setOpen] = useState(false);
   const [pay, setPay] = useState<PayInfo | null>(null);
   const [qr, setQr] = useState<string | null>(null);
   const [thanks, setThanks] = useState<PayStatus | null>(null);
@@ -41,7 +42,7 @@ export function DonateForm({
     background: theme.field,
     color: theme.text,
     borderColor: theme.border,
-    borderRadius: theme.radius,
+    borderRadius: "16px",
   };
 
   useEffect(() => {
@@ -121,7 +122,7 @@ export function DonateForm({
         <button
           type="button"
           className="h-12 w-full text-sm font-semibold transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
-          style={{ background: theme.accent, color: theme.buttonText, borderRadius: theme.radius }}
+          style={{ background: theme.button, color: theme.buttonText, borderRadius: theme.radius }}
           onClick={reset}
         >
           Надіслати ще
@@ -149,7 +150,7 @@ export function DonateForm({
           <button
             type="button"
             className="h-12 w-full text-sm font-semibold transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
-            style={{ background: theme.accent, color: theme.buttonText, borderRadius: theme.radius }}
+            style={{ background: theme.button, color: theme.buttonText, borderRadius: theme.radius }}
           >
             Відкрити Банку
           </button>
@@ -166,6 +167,19 @@ export function DonateForm({
     );
   }
 
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="h-12 w-full text-sm font-semibold transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
+        style={{ background: theme.button, color: theme.buttonText, borderRadius: theme.radius }}
+      >
+        Підтримати →
+      </button>
+    );
+  }
+
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       <label className="block text-sm" style={{ color: theme.muted }}>
@@ -177,7 +191,7 @@ export function DonateForm({
           maxLength={24}
           placeholder="boston_fan"
           disabled={preview}
-          className="mt-1.5 h-11 w-full border px-3 text-sm outline-none"
+          className="mt-1.5 h-12 w-full border px-4 text-sm leading-none outline-none placeholder:opacity-40"
           style={fieldStyle}
         />
       </label>
@@ -191,7 +205,7 @@ export function DonateForm({
           required
           defaultValue={Math.max(minAmount / 100, 50)}
           disabled={preview}
-          className="mt-1.5 h-11 w-full border px-3 text-sm outline-none"
+          className="mt-1.5 h-12 w-full border px-4 text-sm leading-none outline-none [appearance:textfield] placeholder:opacity-40 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           style={fieldStyle}
         />
       </label>
@@ -200,9 +214,10 @@ export function DonateForm({
         <textarea
           name="message"
           maxLength={180}
+          rows={3}
           placeholder="запускай Condemned"
           disabled={preview}
-          className="mt-1.5 min-h-24 w-full border px-3 py-2 text-sm outline-none"
+          className="mt-1.5 min-h-24 w-full resize-none border px-4 py-3 text-sm leading-5 outline-none placeholder:opacity-40"
           style={fieldStyle}
         />
       </label>
@@ -211,9 +226,9 @@ export function DonateForm({
         type="submit"
         disabled={pending || preview}
         className="h-12 w-full text-sm font-semibold transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
-        style={{ background: theme.accent, color: theme.buttonText, borderRadius: theme.radius }}
+        style={{ background: theme.button, color: theme.buttonText, borderRadius: theme.radius }}
       >
-        {pending ? "Готую…" : "Підтримати донатом"}
+        {pending ? "Готую…" : "Підтримати →"}
       </button>
     </form>
   );

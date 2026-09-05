@@ -11,7 +11,7 @@ const STEPS = [
 
 const FEATURES = [
   { title: "Готові віджети", text: "Overlay для OBS з прозорим фоном. Тестовий алерт без справжнього переказу." },
-  { title: "Шаблони сторінки", text: "Midnight, Aurora, Violet, Paper і Mono. Превʼю одразу як жива сторінка." },
+  { title: "Шаблони сторінки", text: "Noir, Paper, Neon, Pink і Sky. Своє фото на фон, превʼю одразу як жива картка." },
   { title: "Свій лінк", text: "Короткий URL /d/твій-нік. QR і посилання на Банку після форми." },
   { title: "Аналітика", text: "Перегляди, донати, сума, конверсія і графік по днях." },
 ];
@@ -147,11 +147,11 @@ export default async function HomePage() {
         </p>
         <div className="mt-10 grid gap-4 sm:grid-cols-5">
           {[
-            { name: "Midnight", bg: "#0b0d12", accent: "#fff" },
-            { name: "Aurora", bg: "#070814", accent: "#7cffb2" },
-            { name: "Violet", bg: "#0e0e10", accent: "#bf94ff" },
-            { name: "Paper", bg: "#f4efe6", accent: "#1b1713" },
-            { name: "Mono", bg: "#000", accent: "#fff" },
+            { name: "Noir", bg: "#0a0a0a", accent: "#fff" },
+            { name: "Paper", bg: "#f2e6d0", accent: "#2a241c" },
+            { name: "Neon", bg: "#12081c", accent: "#c084fc" },
+            { name: "Pink", bg: "#ffd6e7", accent: "#ec4899" },
+            { name: "Sky", bg: "#eef3f8", accent: "#2b8fff" },
           ].map((item) => (
             <div key={item.name} className="overflow-hidden rounded-2xl border border-zinc-200">
               <div className="flex h-28 items-end p-3" style={{ background: item.bg }}>

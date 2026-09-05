@@ -4,6 +4,7 @@ import { AlertFileSlot } from "@/components/alert-file-slot";
 import { Button, Card, Input, Label } from "@/components/ui";
 import { kopiykyToUah, uahToKopiyky } from "@/lib/money";
 import type { AlertTierConfig } from "@/lib/overlay";
+import { uploadForm } from "@/lib/upload";
 import { useState } from "react";
 
 type Tier = AlertTierConfig;
@@ -20,6 +21,7 @@ export function AlertTiersEditor({
   const [tiers, setTiers] = useState(initialTiers);
   const [tts, setTts] = useState(initialTts);
   const [pending, setPending] = useState(false);
+  const [progress, setProgress] = useState<{ key: string; value: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function commit(next: Tier[]) {
@@ -69,20 +71,28 @@ export function AlertTiersEditor({
   }
 
   async function upload(id: string, kind: "gif" | "audio", file: File) {
+    const key = `${id}:${kind}`;
     setPending(true);
+    setProgress({ key, value: 1 });
     setError(null);
     const body = new FormData();
     body.set("tierId", id);
     body.set("kind", kind);
     body.set("file", file);
-    const res = await fetch("/api/settings/alerts/file", { method: "POST", body });
-    const data = (await res.json()) as Tier & { error?: string };
-    setPending(false);
-    if (!res.ok) {
-      setError(data.error || "Не вдалося завантажити");
-      return;
+    try {
+      const res = await uploadForm("/api/settings/alerts/file", body, (value) => setProgress({ key, value }));
+      const data = (await res.json()) as Tier & { error?: string };
+      if (!res.ok) {
+        setError(data.error || "Не вдалося завантажити");
+        return;
+      }
+      commit(tiers.map((tier) => (tier.id === id ? data : tier)));
+    } catch {
+      setError("Не вдалося завантажити");
+    } finally {
+      setPending(false);
+      setProgress(null);
     }
-    commit(tiers.map((tier) => (tier.id === id ? data : tier)));
   }
 
   async function clearFile(id: string, kind: "gif" | "audio") {
@@ -140,6 +150,7 @@ export function AlertTiersEditor({
                 preview={tier.gifUrl}
                 hint={tier.gifUrl ? "Замінити" : "GIF / WEBP"}
                 disabled={pending}
+                progress={progress?.key === `${tier.id}:gif` ? progress.value : null}
                 onFile={(file) => void upload(tier.id, "gif", file)}
                 onClear={tier.gifUrl ? () => void clearFile(tier.id, "gif") : undefined}
               />
@@ -148,6 +159,7 @@ export function AlertTiersEditor({
                 accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg"
                 hint={tier.audioUrl ? "Файл є · замінити" : "MP3 / WAV / OGG"}
                 disabled={pending}
+                progress={progress?.key === `${tier.id}:audio` ? progress.value : null}
                 onFile={(file) => void upload(tier.id, "audio", file)}
                 onClear={tier.audioUrl ? () => void clearFile(tier.id, "audio") : undefined}
               />

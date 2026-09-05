@@ -2,6 +2,7 @@ export const PAGE_TAGS = [
   "{{title}}",
   "{{bio}}",
   "{{avatar}}",
+  "{{cover}}",
   "{{twitch}}",
   "{{raised}}",
   "{{goal}}",

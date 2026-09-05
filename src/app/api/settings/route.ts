@@ -4,6 +4,7 @@ import { isValidSlug } from "@/lib/slug";
 import { requireApiUser } from "@/lib/user";
 import { isOverlayStyle, isOverlayTone } from "@/lib/overlay";
 import { isPageThemeId } from "@/lib/themes";
+import { cleanSocialInput } from "@/lib/social";
 import { sanitizeCss, sanitizeHtml, TEMPLATE_LIMIT } from "@/lib/template";
 import { clamp, isEmail, isHexColor } from "@/lib/validate";
 import { NextResponse } from "next/server";
@@ -50,6 +51,12 @@ export async function PATCH(req: Request) {
     recentUseCustom?: boolean;
     recentCustomHtml?: string;
     recentCustomCss?: string;
+    socialTwitch?: string;
+    socialYoutube?: string;
+    socialDiscord?: string;
+    socialInstagram?: string;
+    socialTiktok?: string;
+    socialX?: string;
   }>(req);
 
   const name = body.name?.trim() ?? user.name;
@@ -141,6 +148,12 @@ export async function PATCH(req: Request) {
       recentUseCustom: body.recentUseCustom ?? user.recentUseCustom,
       recentCustomHtml: sanitizeHtml((body.recentCustomHtml ?? user.recentCustomHtml).slice(0, TEMPLATE_LIMIT)),
       recentCustomCss: sanitizeCss((body.recentCustomCss ?? user.recentCustomCss).slice(0, TEMPLATE_LIMIT)),
+      socialTwitch: cleanSocialInput(body.socialTwitch ?? user.socialTwitch),
+      socialYoutube: cleanSocialInput(body.socialYoutube ?? user.socialYoutube),
+      socialDiscord: cleanSocialInput(body.socialDiscord ?? user.socialDiscord),
+      socialInstagram: cleanSocialInput(body.socialInstagram ?? user.socialInstagram),
+      socialTiktok: cleanSocialInput(body.socialTiktok ?? user.socialTiktok),
+      socialX: cleanSocialInput(body.socialX ?? user.socialX),
     },
   });
 

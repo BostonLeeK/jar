@@ -1,12 +1,14 @@
 "use client";
 
 import { AvatarField } from "@/components/avatar-field";
+import { CoverField } from "@/components/cover-field";
 import { DonatePageView } from "@/components/donate-page";
 import { ScaledFrame } from "@/components/scaled-frame";
 import { TemplateEditor } from "@/components/template-editor";
 import { Button, Card, FieldError, Input, Label, Textarea } from "@/components/ui";
 import { DEFAULT_PAGE_CSS, DEFAULT_PAGE_HTML, PAGE_TAGS } from "@/lib/custom-defaults";
 import { kopiykyToUah, uahToKopiyky } from "@/lib/money";
+import { resolveSocial, SOCIAL_FIELDS } from "@/lib/social";
 import { getPageTheme, PAGE_THEMES } from "@/lib/themes";
 import type { SafeUser } from "@/lib/user";
 import { cn } from "@/lib/cn";
@@ -18,6 +20,7 @@ export function PageEditor({ user }: { user: SafeUser }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [avatar, setAvatar] = useState(user.avatarUrl || user.twitchAvatar);
+  const [cover, setCover] = useState(user.pageCoverUrl);
   const [form, setForm] = useState({
     pageTitle: user.pageTitle || user.name,
     pageBio: user.pageBio,
@@ -28,6 +31,12 @@ export function PageEditor({ user }: { user: SafeUser }) {
     pageUseCustom: user.pageUseCustom,
     pageCustomHtml: user.pageCustomHtml || DEFAULT_PAGE_HTML,
     pageCustomCss: user.pageCustomCss || DEFAULT_PAGE_CSS,
+    socialTwitch: user.socialTwitch,
+    socialYoutube: user.socialYoutube,
+    socialDiscord: user.socialDiscord,
+    socialInstagram: user.socialInstagram,
+    socialTiktok: user.socialTiktok,
+    socialX: user.socialX,
   });
 
   const theme = getPageTheme(form.pageTheme);
@@ -38,6 +47,7 @@ export function PageEditor({ user }: { user: SafeUser }) {
       bio: form.pageBio,
       twitchLogin: user.twitchLogin,
       avatar,
+      cover,
       showGoal: form.showGoal,
       raised: user.monoJarBalance,
       goal: uahToKopiyky(Number(form.goalAmount) || 0),
@@ -51,8 +61,17 @@ export function PageEditor({ user }: { user: SafeUser }) {
         html: form.pageCustomHtml,
         css: form.pageCustomCss,
       },
+      social: resolveSocial({
+        twitchLogin: user.twitchLogin,
+        socialTwitch: form.socialTwitch,
+        socialYoutube: form.socialYoutube,
+        socialDiscord: form.socialDiscord,
+        socialInstagram: form.socialInstagram,
+        socialTiktok: form.socialTiktok,
+        socialX: form.socialX,
+      }),
     }),
-    [avatar, form, theme, user],
+    [avatar, cover, form, theme, user],
   );
 
   async function save(event: React.FormEvent) {
@@ -75,6 +94,12 @@ export function PageEditor({ user }: { user: SafeUser }) {
         pageUseCustom: form.pageUseCustom,
         pageCustomHtml: form.pageCustomHtml,
         pageCustomCss: form.pageCustomCss,
+        socialTwitch: form.socialTwitch,
+        socialYoutube: form.socialYoutube,
+        socialDiscord: form.socialDiscord,
+        socialInstagram: form.socialInstagram,
+        socialTiktok: form.socialTiktok,
+        socialX: form.socialX,
       }),
     });
     const data = (await res.json()) as { error?: string };
@@ -105,12 +130,11 @@ export function PageEditor({ user }: { user: SafeUser }) {
                   form.pageTheme === item.id ? "border-zinc-900" : "border-zinc-200 hover:border-zinc-400",
                 )}
               >
-                <div className="h-16" style={{ background: item.background }}>
-                  <div className="flex h-full items-end p-2">
-                    <span
-                      className="h-6 flex-1"
-                      style={{ background: item.accent, borderRadius: item.radius }}
-                    />
+                <div className="relative h-20 overflow-hidden" style={{ background: item.background }}>
+                  <div className="absolute inset-y-0 right-0 w-1/2 opacity-50" style={{ background: item.button }} />
+                  <div className="absolute inset-0" style={{ background: item.veil }} />
+                  <div className="absolute inset-x-2 bottom-2">
+                    <span className="block h-2 rounded-full" style={{ background: item.accent, width: "42%" }} />
                   </div>
                 </div>
                 <div className="px-3 py-2">
@@ -133,6 +157,14 @@ export function PageEditor({ user }: { user: SafeUser }) {
             name={form.pageTitle || user.name}
             onChange={setAvatar}
           />
+        </Card>
+
+        <Card className="space-y-4 p-5">
+          <div>
+            <h2 className="text-sm font-medium">Фон</h2>
+            <p className="mt-1 text-sm text-zinc-500">Фото праворуч. Без нього шаблон лишає свою атмосферу.</p>
+          </div>
+          <CoverField cover={user.pageCoverUrl} onChange={setCover} />
         </Card>
 
         <Card className="space-y-4 p-5">
@@ -186,6 +218,26 @@ export function PageEditor({ user }: { user: SafeUser }) {
         </Card>
 
         <Card className="space-y-4 p-5">
+          <div>
+            <h2 className="text-sm font-medium">Соцмережі</h2>
+            <p className="mt-1 text-sm text-zinc-500">Нік або повне посилання. Порожнє поле на картці не показується.</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {SOCIAL_FIELDS.map((item) => (
+              <div key={item.key}>
+                <Label htmlFor={item.key}>{item.label}</Label>
+                <Input
+                  id={item.key}
+                  value={form[item.key]}
+                  placeholder={item.key === "socialTwitch" && user.twitchLogin ? user.twitchLogin : item.placeholder}
+                  onChange={(event) => setForm((prev) => ({ ...prev, [item.key]: event.target.value }))}
+                />
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="space-y-4 p-5">
           <label className="flex items-center gap-2 text-sm font-medium text-zinc-800">
             <input
               type="checkbox"
@@ -220,7 +272,7 @@ export function PageEditor({ user }: { user: SafeUser }) {
             Відкрити
           </a>
         </div>
-        <ScaledFrame width={720} height={920}>
+        <ScaledFrame width={420} height={860}>
           <DonatePageView {...preview} />
         </ScaledFrame>
       </div>

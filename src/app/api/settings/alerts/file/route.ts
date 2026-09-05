@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const kind = kindOf(form.get("kind"));
   const file = form.get("file");
   if (!tierId || !kind || !(file instanceof File) || !isAllowedAlertFile(kind, file)) {
-    return jsonError(kind === "audio" ? "Завантаж MP3, WAV або OGG до 4 МБ" : "Завантаж GIF, WEBP або PNG до 8 МБ");
+    return jsonError(kind === "audio" ? "Завантаж MP3, WAV або OGG до 4 МБ" : "Завантаж GIF, WEBP або PNG до 10 МБ");
   }
   const tier = await prisma.alertTier.findFirst({ where: { id: tierId, userId: user.id } });
   if (!tier) {
