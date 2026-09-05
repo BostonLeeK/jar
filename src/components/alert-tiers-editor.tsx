@@ -198,7 +198,6 @@ export function AlertTiersEditor({
                     src={tier.audioUrl}
                     start={tier.audioStart}
                     end={tier.audioEnd}
-                    disabled={pending}
                     onChange={(audioStart, audioEnd) => void patchTier(tier.id, { audioStart, audioEnd })}
                   />
                 </div>

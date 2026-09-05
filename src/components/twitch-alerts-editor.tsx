@@ -116,7 +116,6 @@ export function TwitchAlertsEditor({
                   src={item.audioUrl}
                   start={item.audioStart}
                   end={item.audioEnd}
-                  disabled={pending}
                   onChange={(audioStart, audioEnd) => void patchAlert(item.id, { audioStart, audioEnd })}
                 />
               </div>

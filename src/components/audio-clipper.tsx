@@ -1,10 +1,13 @@
 "use client";
 
+import { clamp } from "@/lib/validate";
 import { clipRange, formatClipTime, roundClip } from "@/lib/audio-clip";
 import { useEffect, useRef, useState } from "react";
 
-const RANGE =
-  "pointer-events-none absolute inset-0 m-0 w-full cursor-pointer appearance-none bg-transparent [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-zinc-900 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-zinc-900";
+function readDuration(node: HTMLAudioElement) {
+  const value = node.duration;
+  return Number.isFinite(value) && value > 0 ? value : 0;
+}
 
 export function AudioClipper({
   src,
@@ -20,24 +23,71 @@ export function AudioClipper({
   onChange: (start: number, end: number) => void;
 }) {
   const audio = useRef<HTMLAudioElement | null>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const drag = useRef<"from" | "to" | null>(null);
+  const fromRef = useRef(start);
+  const toRef = useRef(end);
   const [duration, setDuration] = useState(0);
   const [from, setFrom] = useState(start);
   const [to, setTo] = useState(end);
   const [playing, setPlaying] = useState(false);
 
+  function setClip(nextFrom: number, nextTo: number) {
+    fromRef.current = nextFrom;
+    toRef.current = nextTo;
+    setFrom(nextFrom);
+    setTo(nextTo);
+  }
+
   useEffect(() => {
-    const node = new Audio(src);
+    let dead = false;
+    let objectUrl = "";
+    const node = new Audio();
     audio.current = node;
-    const onMeta = () => {
-      setDuration(Number.isFinite(node.duration) ? node.duration : 0);
+    node.preload = "auto";
+
+    const apply = () => {
+      const length = readDuration(node);
+      if (dead || !length) {
+        return;
+      }
+      setDuration(length);
     };
-    node.addEventListener("loadedmetadata", onMeta);
-    node.preload = "metadata";
-    node.load();
+
+    node.addEventListener("loadedmetadata", apply);
+    node.addEventListener("durationchange", apply);
+    node.addEventListener("canplay", apply);
+
+    void (async () => {
+      try {
+        const res = await fetch(src, { cache: "reload" });
+        if (!res.ok) {
+          throw new Error("audio");
+        }
+        const blob = await res.blob();
+        if (dead) {
+          return;
+        }
+        objectUrl = URL.createObjectURL(blob);
+        node.src = objectUrl;
+        node.load();
+      } catch {
+        if (!dead) {
+          node.src = src;
+          node.load();
+        }
+      }
+    })();
+
     return () => {
+      dead = true;
       node.pause();
-      node.removeEventListener("loadedmetadata", onMeta);
+      node.removeAttribute("src");
+      node.load();
       audio.current = null;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
       setPlaying(false);
     };
   }, [src]);
@@ -47,8 +97,7 @@ export function AudioClipper({
       return;
     }
     const range = clipRange({ start, end }, duration);
-    setFrom(range.start);
-    setTo(range.end);
+    setClip(range.start, range.end);
   }, [duration, end, start]);
 
   useEffect(() => {
@@ -57,7 +106,7 @@ export function AudioClipper({
       return;
     }
     const onTime = () => {
-      if (node.currentTime >= to - 0.02) {
+      if (node.currentTime >= toRef.current - 0.03) {
         node.pause();
         setPlaying(false);
       }
@@ -69,24 +118,48 @@ export function AudioClipper({
       node.removeEventListener("timeupdate", onTime);
       node.removeEventListener("ended", onEnd);
     };
-  }, [to]);
+  }, [src]);
 
-  function commit(nextFrom: number, nextTo: number) {
-    if (!duration) {
+  function pointToTime(clientX: number) {
+    const box = track.current?.getBoundingClientRect();
+    if (!box || !duration) {
+      return 0;
+    }
+    return roundClip(clamp(((clientX - box.left) / box.width) * duration, 0, duration));
+  }
+
+  function move(clientX: number) {
+    const time = pointToTime(clientX);
+    const gap = Math.min(0.2, duration);
+    if (drag.current === "from") {
+      setClip(Math.min(time, toRef.current - gap), toRef.current);
       return;
     }
-    const startAt = roundClip(Math.min(nextFrom, nextTo - 0.2));
-    const endAt = roundClip(Math.max(nextTo, startAt + 0.2));
-    const safeStart = Math.max(0, startAt);
-    const safeEnd = Math.min(duration, endAt);
-    setFrom(safeStart);
-    setTo(safeEnd);
-    onChange(safeStart, safeEnd);
+    if (drag.current === "to") {
+      setClip(fromRef.current, Math.max(time, fromRef.current + gap));
+    }
+  }
+
+  function stopDrag() {
+    if (!drag.current) {
+      return;
+    }
+    drag.current = null;
+    onChange(fromRef.current, toRef.current);
+  }
+
+  function startDrag(which: "from" | "to", event: React.PointerEvent<HTMLButtonElement>) {
+    if (disabled || !duration) {
+      return;
+    }
+    drag.current = which;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    move(event.clientX);
   }
 
   async function listen() {
     const node = audio.current;
-    if (!node) {
+    if (!node || !duration) {
       return;
     }
     if (playing) {
@@ -94,51 +167,70 @@ export function AudioClipper({
       setPlaying(false);
       return;
     }
-    node.currentTime = from;
+    node.currentTime = fromRef.current;
     await node.play();
     setPlaying(true);
   }
 
   const left = duration > 0 ? (from / duration) * 100 : 0;
-  const width = duration > 0 ? ((to - from) / duration) * 100 : 100;
+  const width = duration > 0 ? ((to - from) / duration) * 100 : 0;
 
   return (
     <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3">
       <div className="flex items-center justify-between text-xs text-zinc-500">
         <span>Від {formatClipTime(from)}</span>
-        <span>До {formatClipTime(to || duration)}</span>
+        <span>{duration ? `До ${formatClipTime(to)}` : "Читаю файл…"}</span>
       </div>
-      <div className="relative h-8">
-        <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-zinc-200">
-          <div className="absolute h-full rounded-full bg-zinc-900" style={{ left: `${left}%`, width: `${width}%` }} />
+      <div
+        ref={track}
+        className="relative mx-2 h-8 touch-none select-none"
+        onPointerDown={(event) => {
+          if (disabled || !duration || (event.target as HTMLElement).closest("button")) {
+            return;
+          }
+          const time = pointToTime(event.clientX);
+          drag.current = Math.abs(time - fromRef.current) <= Math.abs(time - toRef.current) ? "from" : "to";
+          event.currentTarget.setPointerCapture(event.pointerId);
+          move(event.clientX);
+        }}
+        onPointerMove={(event) => {
+          if (drag.current) {
+            move(event.clientX);
+          }
+        }}
+        onPointerUp={stopDrag}
+        onPointerCancel={stopDrag}
+      >
+        <div className="pointer-events-none absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-zinc-200">
+          <div className="absolute h-full rounded-full bg-zinc-900" style={{ left: `${left}%`, width: `${Math.max(width, 0)}%` }} />
         </div>
-        <input
-          type="range"
-          min={0}
-          max={duration || 1}
-          step={0.1}
-          value={from}
+        <button
+          type="button"
           disabled={disabled || !duration}
-          className={RANGE}
-          onChange={(event) => {
-            const value = Number(event.target.value);
-            setFrom(Math.min(value, to - 0.2));
+          className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full bg-zinc-900 disabled:opacity-40"
+          style={{ left: `${left}%` }}
+          onPointerDown={(event) => startDrag("from", event)}
+          onPointerMove={(event) => {
+            if (drag.current) {
+              move(event.clientX);
+            }
           }}
-          onPointerUp={() => commit(from, to)}
+          onPointerUp={stopDrag}
+          aria-label="Початок фрагмента"
         />
-        <input
-          type="range"
-          min={0}
-          max={duration || 1}
-          step={0.1}
-          value={to || duration}
+        <button
+          type="button"
           disabled={disabled || !duration}
-          className={RANGE}
-          onChange={(event) => {
-            const value = Number(event.target.value);
-            setTo(Math.max(value, from + 0.2));
+          className="absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full bg-zinc-900 disabled:opacity-40"
+          style={{ left: `${left + width}%` }}
+          onPointerDown={(event) => startDrag("to", event)}
+          onPointerMove={(event) => {
+            if (drag.current) {
+              move(event.clientX);
+            }
           }}
-          onPointerUp={() => commit(from, to)}
+          onPointerUp={stopDrag}
+          aria-label="Кінець фрагмента"
         />
       </div>
       <div className="flex items-center gap-2">
@@ -153,7 +245,10 @@ export function AudioClipper({
         <button
           type="button"
           disabled={!duration || disabled}
-          onClick={() => commit(0, duration)}
+          onClick={() => {
+            setClip(0, duration);
+            onChange(0, duration);
+          }}
           className="text-xs text-zinc-400 hover:text-zinc-700 disabled:opacity-40"
         >
           Весь файл
