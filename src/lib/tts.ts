@@ -79,7 +79,7 @@ export async function synthesizeSpeech(text: string, lang: TtsLang) {
 }
 
 export function ttsAudioResponse(audio: Uint8Array) {
-  return new Response(audio, {
+  return new Response(Buffer.from(audio), {
     headers: {
       "Content-Type": "audio/mpeg",
       "Cache-Control": "no-store",
