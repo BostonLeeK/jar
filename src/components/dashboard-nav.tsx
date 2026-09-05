@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  IconAsset,
   IconChart,
   IconHome,
   IconPage,
@@ -18,6 +19,7 @@ const LINKS = [
   { href: "/dashboard", label: "Панель керування", icon: IconHome, exact: true },
   { href: "/dashboard/connections", label: "Підключення", icon: IconPlug },
   { href: "/dashboard/widgets", label: "Віджети", icon: IconWidget },
+  { href: "/dashboard/assets", label: "Асети", icon: IconAsset },
   { href: "/dashboard/customize", label: "Сторінка донатів", icon: IconPage },
   { href: "/dashboard/analytics", label: "Аналітика", icon: IconChart },
   { href: "/dashboard/settings", label: "Налаштування", icon: IconSettings },

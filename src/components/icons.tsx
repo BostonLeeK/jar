@@ -69,6 +69,16 @@ export function IconSettings(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconAsset(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <rect x="3" y="6" width="18" height="12" rx="2" />
+      <path d="M3 15l4.2-3.4a2 2 0 0 1 2.5 0L14 15l1.6-1.3a2 2 0 0 1 2.4 0L21 16" />
+      <circle cx="9" cy="10" r="1.2" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}
+
 export function IconHelp(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
