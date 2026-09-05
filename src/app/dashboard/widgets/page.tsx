@@ -8,7 +8,7 @@ export default async function WidgetsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-medium tracking-tight">OBS</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Віджети</h1>
         <p className="mt-1 text-sm text-zinc-500">Три Browser Source віджети з прозорим фоном.</p>
       </div>
       <WidgetsPanel token={user.overlayToken} appUrl={getAppUrl()} />

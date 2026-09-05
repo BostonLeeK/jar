@@ -1,9 +1,11 @@
 "use client";
 
-import { DonatePreview } from "@/components/donate-preview";
+import { DonatePageView } from "@/components/donate-page";
 import { Button, Card, FieldError, Input, Label, Textarea } from "@/components/ui";
 import { kopiykyToUah, uahToKopiyky } from "@/lib/money";
+import { getPageTheme, PAGE_THEMES } from "@/lib/themes";
 import type { SafeUser } from "@/lib/user";
+import { cn } from "@/lib/cn";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -12,12 +14,9 @@ export function PageEditor({ user }: { user: SafeUser }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [form, setForm] = useState({
-    name: user.name,
-    slug: user.slug,
-    pageTitle: user.pageTitle,
+    pageTitle: user.pageTitle || user.name,
     pageBio: user.pageBio,
-    accentColor: user.accentColor,
-    background: user.background,
+    pageTheme: user.pageTheme,
     showGoal: user.showGoal,
     goalAmount: String(kopiykyToUah(user.goalAmount || user.monoJarGoal)),
     minAmount: String(kopiykyToUah(user.minAmount)),
@@ -25,35 +24,40 @@ export function PageEditor({ user }: { user: SafeUser }) {
     alertStyle: user.alertStyle,
   });
 
+  const theme = getPageTheme(form.pageTheme);
   const preview = useMemo(
     () => ({
-      name: form.pageTitle || form.name,
+      theme,
+      title: form.pageTitle || user.name,
       bio: form.pageBio,
-      accent: form.accentColor,
-      background: form.background,
+      twitchLogin: user.twitchLogin,
+      twitchAvatar: user.twitchAvatar,
       showGoal: form.showGoal,
       raised: user.monoJarBalance,
       goal: uahToKopiyky(Number(form.goalAmount) || 0),
-      twitchLogin: user.twitchLogin,
-      twitchAvatar: user.twitchAvatar,
+      slug: user.slug,
+      minAmount: uahToKopiyky(Number(form.minAmount) || 10),
+      ready: Boolean(user.monoSendId),
+      recent: [] as { id: string; nickname: string; amount: number }[],
+      preview: true,
     }),
-    [form, user.monoJarBalance, user.twitchAvatar, user.twitchLogin],
+    [form, theme, user],
   );
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
     setPending(true);
     setError(null);
+    const selected = getPageTheme(form.pageTheme);
     const res = await fetch("/api/settings", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: form.name,
-        slug: form.slug,
         pageTitle: form.pageTitle,
         pageBio: form.pageBio,
-        accentColor: form.accentColor,
-        background: form.background,
+        pageTheme: selected.id,
+        accentColor: selected.accent,
+        background: selected.background,
         showGoal: form.showGoal,
         goalAmount: uahToKopiyky(Number(form.goalAmount) || 0),
         minAmount: uahToKopiyky(Number(form.minAmount) || 10),
@@ -71,27 +75,42 @@ export function PageEditor({ user }: { user: SafeUser }) {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
       <form onSubmit={save} className="space-y-4">
-        <Card className="space-y-4 p-5">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="name">Імʼя</Label>
-              <Input
-                id="name"
-                value={form.name}
-                onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="slug">URL сторінки</Label>
-              <Input
-                id="slug"
-                value={form.slug}
-                onChange={(event) => setForm((prev) => ({ ...prev, slug: event.target.value }))}
-              />
-            </div>
+        <Card className="space-y-3 p-5">
+          <div>
+            <h2 className="text-sm font-medium">Шаблон</h2>
+            <p className="mt-1 text-sm text-zinc-500">Обери готовий вигляд — сторінка зміниться одразу.</p>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            {PAGE_THEMES.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setForm((prev) => ({ ...prev, pageTheme: item.id }))}
+                className={cn(
+                  "overflow-hidden rounded-2xl border text-left transition-colors",
+                  form.pageTheme === item.id ? "border-zinc-900" : "border-zinc-200 hover:border-zinc-400",
+                )}
+              >
+                <div className="h-16" style={{ background: item.background }}>
+                  <div className="flex h-full items-end p-2">
+                    <span
+                      className="h-6 flex-1"
+                      style={{ background: item.accent, borderRadius: item.radius }}
+                    />
+                  </div>
+                </div>
+                <div className="px-3 py-2">
+                  <p className="text-sm font-medium">{item.name}</p>
+                  <p className="text-xs text-zinc-500">{item.tag}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="space-y-4 p-5">
           <div>
             <Label htmlFor="pageTitle">Заголовок</Label>
             <Input
@@ -110,40 +129,6 @@ export function PageEditor({ user }: { user: SafeUser }) {
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="accent">Акцент</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="accent"
-                  type="color"
-                  value={form.accentColor}
-                  onChange={(event) => setForm((prev) => ({ ...prev, accentColor: event.target.value }))}
-                  className="w-12 cursor-pointer px-1"
-                />
-                <Input
-                  value={form.accentColor}
-                  onChange={(event) => setForm((prev) => ({ ...prev, accentColor: event.target.value }))}
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="background">Фон</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="background"
-                  type="color"
-                  value={form.background}
-                  onChange={(event) => setForm((prev) => ({ ...prev, background: event.target.value }))}
-                  className="w-12 cursor-pointer px-1"
-                />
-                <Input
-                  value={form.background}
-                  onChange={(event) => setForm((prev) => ({ ...prev, background: event.target.value }))}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <Label htmlFor="goal">Ціль, ₴</Label>
               <Input
@@ -164,6 +149,19 @@ export function PageEditor({ user }: { user: SafeUser }) {
                 onChange={(event) => setForm((prev) => ({ ...prev, minAmount: event.target.value }))}
               />
             </div>
+          </div>
+          <label className="flex items-center gap-2 text-sm text-zinc-600">
+            <input
+              type="checkbox"
+              checked={form.showGoal}
+              onChange={(event) => setForm((prev) => ({ ...prev, showGoal: event.target.checked }))}
+            />
+            Показувати прогрес збору
+          </label>
+        </Card>
+
+        <Card className="space-y-4 p-5">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="duration">Алерт, сек</Label>
               <Input
@@ -175,35 +173,36 @@ export function PageEditor({ user }: { user: SafeUser }) {
                 onChange={(event) => setForm((prev) => ({ ...prev, overlayDuration: event.target.value }))}
               />
             </div>
-          </div>
-          <label className="flex items-center gap-2 text-sm text-zinc-400">
-            <input
-              type="checkbox"
-              checked={form.showGoal}
-              onChange={(event) => setForm((prev) => ({ ...prev, showGoal: event.target.checked }))}
-            />
-            Показувати прогрес збору
-          </label>
-          <div>
-            <Label htmlFor="style">Стиль алерту</Label>
-            <select
-              id="style"
-              value={form.alertStyle}
-              onChange={(event) => setForm((prev) => ({ ...prev, alertStyle: event.target.value }))}
-              className="h-9 w-full rounded-md border border-white/10 bg-black px-3 text-sm"
-            >
-              <option value="minimal">Minimal</option>
-              <option value="card">Card</option>
-              <option value="banner">Banner</option>
-            </select>
+            <div>
+              <Label htmlFor="style">Стиль алерту</Label>
+              <select
+                id="style"
+                value={form.alertStyle}
+                onChange={(event) => setForm((prev) => ({ ...prev, alertStyle: event.target.value }))}
+                className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm"
+              >
+                <option value="minimal">Minimal</option>
+                <option value="card">Card</option>
+                <option value="banner">Banner</option>
+              </select>
+            </div>
           </div>
         </Card>
         <FieldError>{error}</FieldError>
         <Button type="submit" disabled={pending}>
-          {pending ? "Зберігаю…" : "Зберегти"}
+          {pending ? "Зберігаю…" : "Зберегти сторінку"}
         </Button>
       </form>
-      <DonatePreview {...preview} />
+
+      <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-100">
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-white px-4 py-2">
+          <p className="text-xs font-medium text-zinc-500">Живе превʼю · {theme.name}</p>
+          <a href={`/d/${user.slug}`} target="_blank" rel="noreferrer" className="text-xs text-zinc-500 hover:text-zinc-900">
+            Відкрити
+          </a>
+        </div>
+        <DonatePageView {...preview} />
+      </div>
     </div>
   );
 }

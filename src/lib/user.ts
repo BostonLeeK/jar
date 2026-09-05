@@ -47,6 +47,7 @@ export function toSafeUser(user: User) {
     twitchAvatar: user.twitchAvatar,
     pageTitle: user.pageTitle,
     pageBio: user.pageBio,
+    pageTheme: user.pageTheme,
     accentColor: user.accentColor,
     background: user.background,
     showGoal: user.showGoal,
@@ -55,6 +56,7 @@ export function toSafeUser(user: User) {
     overlayToken: user.overlayToken,
     overlayDuration: user.overlayDuration,
     alertStyle: user.alertStyle,
+    pageViews: user.pageViews,
   };
 }
 

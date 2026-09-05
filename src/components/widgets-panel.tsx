@@ -60,7 +60,7 @@ export function WidgetsPanel({
 
       <Card className="p-5">
         <h2 className="text-sm font-medium">OBS</h2>
-        <ol className="mt-3 space-y-2 text-sm text-zinc-400">
+        <ol className="mt-3 space-y-2 text-sm text-zinc-500">
           <li>1. Sources → Browser</li>
           <li>2. Встав URL віджета</li>
           <li>3. Увімкни Shutdown source when not visible</li>

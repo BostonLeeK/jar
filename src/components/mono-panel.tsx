@@ -79,7 +79,7 @@ export function MonoPanel({
         <h2 className="text-sm font-medium">Personal API</h2>
         <p className="mt-1 text-sm text-zinc-500">
           Токен береться на{" "}
-          <a href="https://api.monobank.ua/" className="text-white underline-offset-2 hover:underline" target="_blank" rel="noreferrer">
+          <a href="https://api.monobank.ua/" className="text-zinc-900 underline-offset-2 hover:underline" target="_blank" rel="noreferrer">
             api.monobank.ua
           </a>
           . Зберігається в зашифрованому вигляді.
@@ -100,7 +100,7 @@ export function MonoPanel({
           </Button>
         </form>
         <FieldError>{error}</FieldError>
-        {webhookNote ? <p className="mt-3 text-sm text-amber-400">{webhookNote}</p> : null}
+        {webhookNote ? <p className="mt-3 text-sm text-amber-600">{webhookNote}</p> : null}
         {local ? (
           <p className="mt-3 text-sm text-zinc-500">
             Зараз APP_URL локальний. Для живих webhook потрібен тунель (Cloudflare Tunnel / ngrok) і той самий URL у
@@ -120,8 +120,8 @@ export function MonoPanel({
                 disabled={pending}
                 onClick={() => selectJar(jar.id)}
                 className={cn(
-                  "rounded-xl border p-4 text-left transition-colors",
-                  active ? "border-white/40 bg-white/5" : "border-white/8 hover:border-white/20",
+                  "rounded-2xl border p-4 text-left transition-colors",
+                  active ? "border-zinc-900 bg-zinc-50" : "border-zinc-200 hover:border-zinc-300",
                 )}
               >
                 <div className="flex items-center justify-between gap-4">
@@ -129,7 +129,7 @@ export function MonoPanel({
                     <p className="text-sm font-medium">{jar.title}</p>
                     <p className="mt-1 text-xs text-zinc-500">send.monobank.ua/{jar.sendId}</p>
                   </div>
-                  <p className="font-mono text-sm text-zinc-300">{formatUah(jar.balance)}</p>
+                  <p className="font-mono text-sm text-zinc-700">{formatUah(jar.balance)}</p>
                 </div>
               </button>
             );

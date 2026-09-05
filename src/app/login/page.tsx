@@ -10,10 +10,10 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex min-h-full flex-col bg-white">
       <SiteHeader />
       <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 pb-20">
-        <h1 className="mb-6 text-2xl font-medium tracking-tight">Увійти</h1>
+        <h1 className="mb-6 text-2xl font-semibold tracking-tight">Увійти</h1>
         <AuthForm mode="login" />
       </main>
     </div>

@@ -57,7 +57,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       </Button>
       <p className="text-center text-sm text-zinc-500">
         {isRegister ? "Вже є акаунт?" : "Немає акаунта?"}{" "}
-        <Link href={isRegister ? "/login" : "/register"} className="text-white hover:underline">
+        <Link href={isRegister ? "/login" : "/register"} className="text-zinc-900 hover:underline">
           {isRegister ? "Увійти" : "Зареєструватись"}
         </Link>
       </p>

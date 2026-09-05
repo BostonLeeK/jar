@@ -31,6 +31,7 @@ model User {
 
   pageTitle       String  @default("")
   pageBio         String  @default("")
+  pageTheme       String  @default("midnight")
   accentColor     String  @default("#ffffff")
   background      String  @default("#000000")
   showGoal        Boolean @default(true)
@@ -40,6 +41,7 @@ model User {
   webhookToken    String  @unique @default(cuid())
   overlayDuration Int     @default(8)
   alertStyle      String  @default("minimal")
+  pageViews       Int     @default(0)
 
   donations Donation[]
   pending   PendingDonation[]

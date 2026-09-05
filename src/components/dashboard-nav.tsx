@@ -1,26 +1,37 @@
 "use client";
 
+import {
+  IconChart,
+  IconHelp,
+  IconHome,
+  IconPage,
+  IconPlug,
+  IconSettings,
+  IconWidget,
+  LogoMark,
+} from "@/components/icons";
 import { LogoutButton } from "@/components/logout-button";
 import { cn } from "@/lib/cn";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { href: "/dashboard", label: "Огляд" },
-  { href: "/dashboard/mono", label: "Monobank" },
-  { href: "/dashboard/twitch", label: "Twitch" },
-  { href: "/dashboard/customize", label: "Сторінка" },
-  { href: "/dashboard/widgets", label: "OBS" },
+  { href: "/dashboard", label: "Панель керування", icon: IconHome, exact: true },
+  { href: "/dashboard/connections", label: "Підключення", icon: IconPlug },
+  { href: "/dashboard/widgets", label: "Віджети", icon: IconWidget },
+  { href: "/dashboard/customize", label: "Сторінка донатів", icon: IconPage },
+  { href: "/dashboard/analytics", label: "Аналітика", icon: IconChart },
+  { href: "/dashboard/settings", label: "Налаштування", icon: IconSettings },
 ];
 
 export function DashboardNav({ email }: { email: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex shrink-0 flex-col border-b border-white/8 px-4 py-4 md:w-56 md:border-b-0 md:border-r md:py-6">
+    <aside className="flex shrink-0 flex-col border-b border-zinc-200 bg-white px-4 py-4 md:sticky md:top-0 md:h-dvh md:w-64 md:border-b-0 md:border-r md:py-6">
       <div className="mb-4 flex items-center justify-between md:mb-8">
-        <Link href="/" className="px-2 text-sm font-medium tracking-tight">
-          jar<span className="text-zinc-500">.</span>
+        <Link href="/" className="px-2 text-[18px] text-zinc-900">
+          <LogoMark />
         </Link>
         <div className="md:hidden">
           <LogoutButton className="w-auto" />
@@ -28,23 +39,35 @@ export function DashboardNav({ email }: { email: string }) {
       </div>
       <nav className="flex gap-1 overflow-x-auto md:flex-1 md:flex-col">
         {LINKS.map((link) => {
-          const active = pathname === link.href;
+          const active = link.exact
+            ? pathname === link.href
+            : link.href === "/dashboard/connections"
+              ? ["/dashboard/connections", "/dashboard/mono", "/dashboard/twitch"].some((path) =>
+                  pathname.startsWith(path),
+                )
+              : pathname.startsWith(link.href);
+          const Icon = link.icon;
           return (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "whitespace-nowrap rounded-md px-2 py-1.5 text-sm transition-colors",
-                active ? "bg-white/8 text-white" : "text-zinc-500 hover:bg-white/5 hover:text-white",
+                "flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3 py-2 text-sm transition-colors",
+                active ? "bg-zinc-100 font-medium text-zinc-900" : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900",
               )}
             >
+              <Icon className="h-4 w-4" />
               {link.label}
             </Link>
           );
         })}
       </nav>
-      <div className="mt-6 hidden border-t border-white/8 pt-4 md:block">
-        <p className="truncate px-2 text-xs text-zinc-500">{email}</p>
+      <div className="mt-6 hidden space-y-3 md:mt-auto md:block">
+        <p className="truncate px-2 text-xs text-zinc-400">{email}</p>
+        <Link href="/dashboard/settings" className="flex items-center gap-2 px-2 text-sm text-zinc-500 hover:text-zinc-900">
+          <IconHelp className="h-4 w-4" />
+          Підтримка
+        </Link>
         <LogoutButton />
       </div>
     </aside>

@@ -1,59 +1,50 @@
-import { formatUah } from "@/lib/money";
+import { DonatePageView } from "@/components/donate-page";
+import { getPageTheme } from "@/lib/themes";
 
 export function DonatePreview({
   name,
   bio,
-  accent,
-  background,
+  themeId,
   showGoal,
   raised,
   goal,
   twitchLogin,
   twitchAvatar,
+  slug,
+  minAmount,
+  ready,
 }: {
   name: string;
   bio: string;
-  accent: string;
-  background: string;
+  themeId?: string | null;
   showGoal: boolean;
   raised: number;
   goal: number;
   twitchLogin: string | null;
   twitchAvatar: string | null;
+  slug: string;
+  minAmount: number;
+  ready: boolean;
 }) {
-  const progress = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
-
   return (
-    <div className="overflow-hidden rounded-xl border border-white/8">
-      <div className="border-b border-white/8 px-4 py-2 text-xs uppercase tracking-[0.16em] text-zinc-500">
-        Превʼю
-      </div>
-      <div className="p-5" style={{ background, color: accent }}>
-        <div className="flex items-center gap-3">
-          {twitchAvatar ? <img src={twitchAvatar} alt="" className="h-10 w-10 rounded-full" /> : null}
-          <div>
-            <p className="text-lg font-medium tracking-tight">{name || "Твій нік"}</p>
-            {twitchLogin ? <p className="text-xs opacity-60">twitch.tv/{twitchLogin}</p> : null}
-          </div>
-        </div>
-        {bio ? <p className="mt-4 text-sm opacity-70">{bio}</p> : null}
-        {showGoal && goal > 0 ? (
-          <div className="mt-5">
-            <div className="mb-2 flex justify-between text-xs opacity-70">
-              <span>{formatUah(raised)}</span>
-              <span>{formatUah(goal)}</span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
-              <div className="h-full rounded-full" style={{ width: `${progress}%`, background: accent }} />
-            </div>
-          </div>
-        ) : null}
-        <div className="mt-6 space-y-2 opacity-80">
-          <div className="h-9 rounded-md border border-white/20" />
-          <div className="h-9 rounded-md border border-white/20" />
-          <div className="h-16 rounded-md border border-white/20" />
-          <div className="h-9 rounded-md" style={{ background: accent, color: background }} />
-        </div>
+    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+      <div className="border-b border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-500">Превʼю</div>
+      <div className="max-h-[720px] overflow-auto">
+        <DonatePageView
+          theme={getPageTheme(themeId)}
+          title={name}
+          bio={bio}
+          twitchLogin={twitchLogin}
+          twitchAvatar={twitchAvatar}
+          showGoal={showGoal}
+          raised={raised}
+          goal={goal}
+          slug={slug}
+          minAmount={minAmount}
+          ready={ready}
+          recent={[]}
+          preview
+        />
       </div>
     </div>
   );

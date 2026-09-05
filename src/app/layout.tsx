@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "jar — донати з Банки для стрімів",
+  title: "Jar — донати з Банки для стрімів",
   description: "Сторінка донатів, webhook Monobank і віджети для OBS без комісії сервісу.",
 };
 
@@ -21,9 +21,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="uk"
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} min-h-dvh antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
+      <body className="flex min-h-dvh flex-col bg-background text-foreground font-sans">
         {children}
       </body>
     </html>

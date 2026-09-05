@@ -13,7 +13,7 @@ export default async function TwitchPage({
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-medium tracking-tight">Twitch</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Twitch</h1>
         <p className="mt-1 text-sm text-zinc-500">Підключи канал, щоб він зʼявився на сторінці донатів.</p>
       </div>
       <TwitchPanel user={toSafeUser(user)} configured={twitchConfigured()} error={params.error} />

@@ -50,7 +50,7 @@ export function TwitchPanel({
         </div>
       ) : (
         <div className="space-y-4">
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-500">
             Підключи канал, щоб на сторінці донатів зʼявився нік і аватар Twitch.
           </p>
           {configured ? (
@@ -60,16 +60,16 @@ export function TwitchPanel({
           ) : (
             <div className="space-y-2 text-sm text-zinc-500">
               <p>Додай у `.env` ключі застосунку з dev.twitch.tv:</p>
-              <p className="font-mono text-xs text-zinc-400">TWITCH_CLIENT_ID</p>
-              <p className="font-mono text-xs text-zinc-400">TWITCH_CLIENT_SECRET</p>
+              <p className="font-mono text-xs text-zinc-500">TWITCH_CLIENT_ID</p>
+              <p className="font-mono text-xs text-zinc-500">TWITCH_CLIENT_SECRET</p>
               <p>
                 Redirect URL:{" "}
-                <span className="font-mono text-zinc-300">/api/twitch/callback</span>
+                <span className="font-mono text-zinc-700">/api/twitch/callback</span>
               </p>
             </div>
           )}
           {error ? (
-            <p className="text-sm text-red-400">Не вдалося підключити Twitch. {error}</p>
+            <p className="text-sm text-red-500">Не вдалося підключити Twitch. {error}</p>
           ) : null}
         </div>
       )}
