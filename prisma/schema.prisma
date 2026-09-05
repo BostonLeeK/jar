@@ -64,6 +64,7 @@ model User {
   alertTts          Boolean @default(false)
   ttsLang           String  @default("uk")
   pageViews         Int     @default(0)
+  pageListed        Boolean @default(true)
   pageUseCustom     Boolean @default(false)
   pageCustomHtml    String  @default("")
   pageCustomCss     String  @default("")

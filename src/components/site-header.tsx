@@ -10,6 +10,9 @@ export function SiteHeader({ authed, marketing }: { authed?: boolean; marketing?
         </Link>
         {marketing ? (
           <nav className="hidden items-center gap-6 text-sm text-zinc-500 md:flex">
+            <a href="#creators" className="hover:text-zinc-900">
+              Учасники
+            </a>
             <a href="#how" className="hover:text-zinc-900">
               Як це працює
             </a>

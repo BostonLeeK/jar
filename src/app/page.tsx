@@ -1,5 +1,7 @@
 import { LogoMark } from "@/components/icons";
+import { CreatorGallery, CreatorProof } from "@/components/landing-creators";
 import { SiteHeader } from "@/components/site-header";
+import { getLandingCreators } from "@/lib/creators";
 import { getCurrentUser } from "@/lib/user";
 import Link from "next/link";
 
@@ -36,7 +38,7 @@ const FAQ = [
 ];
 
 export default async function HomePage() {
-  const user = await getCurrentUser();
+  const [user, { count, creators }] = await Promise.all([getCurrentUser(), getLandingCreators()]);
   const startHref = user ? "/dashboard" : "/register";
 
   return (
@@ -67,6 +69,7 @@ export default async function HomePage() {
               Як це працює
             </a>
           </div>
+          <CreatorProof count={count} creators={creators} />
           <ul className="mt-8 space-y-2 text-sm text-zinc-500">
             <li>Без комісії Jar</li>
             <li>Готові шаблони сторінки</li>
@@ -110,6 +113,8 @@ export default async function HomePage() {
           <span>Monobank</span>
         </div>
       </section>
+
+      <CreatorGallery count={count} creators={creators} startHref={startHref} />
 
       <section id="how" className="mx-auto w-full max-w-6xl px-6 py-20">
         <h2 className="text-3xl font-semibold tracking-tight">Як це працює?</h2>

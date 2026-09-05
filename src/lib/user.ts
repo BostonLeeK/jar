@@ -93,6 +93,7 @@ export function toSafeUser(user: User) {
     recentLimit: user.recentLimit,
     recentTitle: user.recentTitle,
     pageViews: user.pageViews,
+    pageListed: user.pageListed,
     pageUseCustom: user.pageUseCustom,
     pageCustomHtml: user.pageCustomHtml,
     pageCustomCss: user.pageCustomCss,

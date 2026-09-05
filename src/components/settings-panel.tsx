@@ -14,6 +14,7 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
   const [profileOk, setProfileOk] = useState(false);
   const [passwordOk, setPasswordOk] = useState(false);
   const [pending, setPending] = useState(false);
+  const [pageListed, setPageListed] = useState(user.pageListed);
   const donateUrl = `${appUrl}${donatePath(user.slug)}`;
 
   async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
@@ -29,6 +30,7 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
         name: form.get("name"),
         email: form.get("email"),
         slug: form.get("slug"),
+        pageListed,
       }),
     });
     const data = (await res.json()) as { error?: string };
@@ -95,6 +97,20 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
             <Input id="slug" name="slug" defaultValue={user.slug} required />
             <p className="mt-1.5 font-mono text-xs text-zinc-400">{donateUrl}</p>
           </div>
+          <label className="flex items-start gap-2 text-sm text-zinc-600">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={!pageListed}
+              onChange={(event) => setPageListed(!event.target.checked)}
+            />
+            <span>
+              Ховати з головної
+              <span className="mt-0.5 block text-xs text-zinc-400">
+                Сторінка /d/{user.slug} лишається відкритою, просто не буде в блоці учасників.
+              </span>
+            </span>
+          </label>
           <FieldError>{profileError}</FieldError>
           {profileOk ? <p className="text-sm text-emerald-600">Збережено</p> : null}
           <Button type="submit" disabled={pending}>

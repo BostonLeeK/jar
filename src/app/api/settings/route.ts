@@ -27,6 +27,7 @@ export async function PATCH(req: Request) {
     accentColor?: string;
     background?: string;
     showGoal?: boolean;
+    pageListed?: boolean;
     goalAmount?: number;
     minAmount?: number;
     overlayDuration?: number;
@@ -124,6 +125,7 @@ export async function PATCH(req: Request) {
       accentColor,
       background,
       showGoal: body.showGoal ?? user.showGoal,
+      pageListed: body.pageListed ?? user.pageListed,
       goalAmount: clamp(Math.round(body.goalAmount ?? user.goalAmount), 0, 100_000_000),
       minAmount: clamp(Math.round(body.minAmount ?? user.minAmount), 100, 1_000_000),
       overlayTone,
