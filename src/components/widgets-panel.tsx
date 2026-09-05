@@ -63,7 +63,11 @@ export function WidgetsPanel({
         <CopyField
           label="Чат Twitch"
           value={chatUrl}
-          hint={twitchLogin ? "Browser Source 350×600." : "Підключи Twitch у кабінеті, інакше чат буде порожній."}
+          hint={
+            twitchLogin
+              ? "Browser Source 360×480, прозорий фон. Рядки зникають за тривалістю віджета."
+              : "Підключи Twitch у кабінеті, інакше чат буде порожній."
+          }
         />
         <div className="flex flex-wrap gap-2">
           <Button type="button" onClick={() => testAlert()} disabled={testPending}>

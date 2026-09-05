@@ -1,5 +1,5 @@
 import { AlertView, GoalView, RecentView, type OverlayDonation, type OverlayState } from "@/components/overlay-widgets";
-import { TwitchChatEmbed } from "@/components/twitch-chat";
+import { ChatView, SAMPLE_CHAT } from "@/components/twitch-chat";
 import { Card } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import type { ReactNode } from "react";
@@ -84,14 +84,16 @@ export function WidgetPreviews({
         </Stage>
       </Card>
       <Card className="overflow-hidden">
-        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Чат Twitch · 350×600</p>
-        {state.twitchLogin ? (
-          <TwitchChatEmbed login={state.twitchLogin} className="h-[320px] w-full border-0 bg-zinc-950" />
-        ) : (
-          <Stage backdrop={backdrop}>
-            <p className="w-full text-center text-sm text-zinc-400">Підключи Twitch, щоб показати чат.</p>
-          </Stage>
-        )}
+        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Чат Twitch · 360×480</p>
+        <Stage backdrop={backdrop}>
+          <ChatView
+            messages={SAMPLE_CHAT}
+            tone={preview.overlayTone}
+            accent={preview.overlayAccent}
+            duration={preview.overlayDuration}
+            preview
+          />
+        </Stage>
       </Card>
     </div>
   );
