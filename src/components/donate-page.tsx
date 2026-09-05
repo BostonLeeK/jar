@@ -8,7 +8,8 @@ import { escapeAttr, escapeHtml } from "@/lib/template";
 import { hasSocial, type SocialLinks } from "@/lib/social";
 import { headingClass, type PageTheme } from "@/lib/themes";
 import { cn } from "@/lib/cn";
-import type { ReactNode } from "react";
+import { SiDiscord, SiInstagram, SiTiktok, SiTwitch, SiX, SiYoutube } from "react-icons/si";
+import type { IconType } from "react-icons";
 
 export type DonateRecent = {
   id: string;
@@ -63,12 +64,12 @@ function ThemeArt({ theme }: { theme: PageTheme }) {
 function SocialIcon({
   href,
   label,
-  children,
+  icon: Icon,
   color,
 }: {
   href: string;
   label: string;
-  children: ReactNode;
+  icon: IconType;
   color: string;
 }) {
   return (
@@ -80,7 +81,7 @@ function SocialIcon({
       style={{ color }}
       aria-label={label}
     >
-      {children}
+      <Icon className="h-4 w-4" />
     </a>
   );
 }
@@ -257,49 +258,21 @@ export function DonatePageView({
         {social && hasSocial(social) ? (
           <div className="flex items-center gap-1 pt-4" style={{ color: theme.text }}>
             {social.twitch ? (
-              <SocialIcon href={social.twitch} label="Twitch" color={theme.text}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-                  <path d="M4 3h16v11.2L16.4 21H11l-2.4-2.4H4zm1.6 1.6v12h3.2l2.4 2.4h4l2.8-2.8V4.6zm7.2 2.4h1.6v4.8h-1.6zm-4 0h1.6v4.8H8.8z" />
-                </svg>
-              </SocialIcon>
+              <SocialIcon href={social.twitch} label="Twitch" icon={SiTwitch} color={theme.text} />
             ) : null}
             {social.youtube ? (
-              <SocialIcon href={social.youtube} label="YouTube" color={theme.text}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-                  <path d="M22 12.2s0-3.2-.4-4.6c-.2-.9-.9-1.6-1.8-1.8C18.2 5.4 12 5.4 12 5.4s-6.2 0-7.8.4c-.9.2-1.6.9-1.8 1.8C2 9 2 12.2 2 12.2s0 3.2.4 4.6c.2.9.9 1.6 1.8 1.8 1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4c.9-.2 1.6-.9 1.8-1.8.4-1.4.4-4.6.4-4.6ZM10 15.2V9.2l5.2 3-5.2 3Z" />
-                </svg>
-              </SocialIcon>
+              <SocialIcon href={social.youtube} label="YouTube" icon={SiYoutube} color={theme.text} />
             ) : null}
             {social.discord ? (
-              <SocialIcon href={social.discord} label="Discord" color={theme.text}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-                  <path d="M8.3 7.8c2.4-1.1 4.7-1.1 7.4 0M7.2 16.2c.9 1.3 2.3 2.2 4.8 2.2s3.9-.9 4.8-2.2M8.6 15.3c-.8 0-1.5-.7-1.5-1.5S7.8 12.3 8.6 12.3s1.4.7 1.4 1.5-.6 1.5-1.4 1.5Zm6.8 0c-.8 0-1.4-.7-1.4-1.5s.6-1.5 1.4-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5ZM4.8 6.4C6.7 4.7 9.2 4 12 4s5.3.7 7.2 2.4c1.4 1.3 2.2 3.8 2.3 6.6 0 2.2-.4 4.2-1.7 5.4-1.4 1.3-3.3 1.6-5 1.6l-1.1 2h-.1l-1.6-2H12c-1.7 0-3.6-.3-5-1.6C5.7 17.2 5.3 15.2 5.3 13c.1-2.8.9-5.3 2.3-6.6Z" />
-                </svg>
-              </SocialIcon>
+              <SocialIcon href={social.discord} label="Discord" icon={SiDiscord} color={theme.text} />
             ) : null}
             {social.instagram ? (
-              <SocialIcon href={social.instagram} label="Instagram" color={theme.text}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <rect x="4" y="4" width="16" height="16" rx="5" />
-                  <circle cx="12" cy="12" r="3.4" />
-                  <circle cx="17.2" cy="6.8" r="0.8" fill="currentColor" />
-                </svg>
-              </SocialIcon>
+              <SocialIcon href={social.instagram} label="Instagram" icon={SiInstagram} color={theme.text} />
             ) : null}
             {social.tiktok ? (
-              <SocialIcon href={social.tiktok} label="TikTok" color={theme.text}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-                  <path d="M14.2 3h2.3c.2 1.6 1.1 3 2.5 3.8 1 .6 2.1.8 3.2.8v2.4c-1.6 0-3.1-.5-4.4-1.3v6.6A6.3 6.3 0 1 1 9.2 9.1v2.5a3.8 3.8 0 1 0 2.7 3.6V3Z" />
-                </svg>
-              </SocialIcon>
+              <SocialIcon href={social.tiktok} label="TikTok" icon={SiTiktok} color={theme.text} />
             ) : null}
-            {social.x ? (
-              <SocialIcon href={social.x} label="X" color={theme.text}>
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-                  <path d="M4 4h4.3l4 5.6L16.8 4H20l-6.4 8.2L20.4 20h-4.3l-4.3-6-4.7 6H3.6l6.8-8.6L4 4Z" />
-                </svg>
-              </SocialIcon>
-            ) : null}
+            {social.x ? <SocialIcon href={social.x} label="X" icon={SiX} color={theme.text} /> : null}
           </div>
         ) : (
           <div className="pt-4" />
