@@ -1,13 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { verifyState } from "@/lib/session";
 import { exchangeTwitchCode, fetchTwitchUser } from "@/lib/twitch";
+import { getAppUrl } from "@/lib/urls";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
+  const appUrl = getAppUrl();
+  const fail = `${appUrl}/dashboard/twitch?error=1`;
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  const fail = new URL("/dashboard/twitch?error=1", url.origin);
 
   if (!code || !state) {
     return NextResponse.redirect(fail);
@@ -26,7 +28,7 @@ export async function GET(req: Request) {
         twitchAvatar: profile.profile_image_url,
       },
     });
-    return NextResponse.redirect(new URL("/dashboard/twitch", url.origin));
+    return NextResponse.redirect(`${appUrl}/dashboard/twitch`);
   } catch {
     return NextResponse.redirect(fail);
   }
