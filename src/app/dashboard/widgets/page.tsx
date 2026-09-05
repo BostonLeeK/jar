@@ -5,11 +5,17 @@ import { requireUser } from "@/lib/user";
 
 export default async function WidgetsPage() {
   const user = await requireUser();
-  const donations = await prisma.donation.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    take: 12,
-  });
+  const [donations, alertTiers] = await Promise.all([
+    prisma.donation.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      take: 12,
+    }),
+    prisma.alertTier.findMany({
+      where: { userId: user.id },
+      orderBy: { minAmount: "asc" },
+    }),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -33,6 +39,14 @@ export default async function WidgetsPage() {
         recentStyle={user.recentStyle}
         recentLimit={user.recentLimit}
         recentTitle={user.recentTitle}
+        alertTts={user.alertTts}
+        alertTiers={alertTiers.map((tier) => ({
+          id: tier.id,
+          minAmount: tier.minAmount,
+          gifUrl: tier.gifUrl,
+          audioUrl: tier.audioUrl,
+          tts: tier.tts,
+        }))}
         donations={donations.map((item) => ({
           id: item.id,
           amount: item.amount,

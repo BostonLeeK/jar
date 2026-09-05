@@ -14,6 +14,9 @@ export async function GET(
         orderBy: { createdAt: "desc" },
         take: 12,
       },
+      alertTiers: {
+        orderBy: { minAmount: "asc" },
+      },
     },
   });
   if (!user) {
@@ -39,6 +42,14 @@ export async function GET(
     recentStyle: user.recentStyle,
     recentLimit: user.recentLimit,
     recentTitle: user.recentTitle,
+    alertTts: user.alertTts,
+    alertTiers: user.alertTiers.map((tier) => ({
+      id: tier.id,
+      minAmount: tier.minAmount,
+      gifUrl: tier.gifUrl,
+      audioUrl: tier.audioUrl,
+      tts: tier.tts,
+    })),
     donations: user.donations.map((item) => ({
       id: item.id,
       amount: item.amount,

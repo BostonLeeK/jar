@@ -60,14 +60,21 @@ export function DonateForm({
     }
     setPay(data);
     setQr(await QRCode.toDataURL(data.payUrl, { margin: 1, width: 240, color: { dark: "#000000", light: "#ffffff" } }));
+    window.open(data.payUrl, "_blank", "noopener,noreferrer");
   }
 
   if (pay) {
     return (
       <div className="space-y-4">
         <p className="text-sm" style={{ color: theme.muted }}>
-          Перекажи рівно <span style={{ color: theme.text }}>{formatUah(pay.amount)}</span>
-          {pay.jarTitle ? ` на «${pay.jarTitle}»` : ""}. Код у коментарі:{" "}
+          Сума і коментар уже в посиланні
+          {pay.jarTitle ? ` на «${pay.jarTitle}»` : ""}. Підтверди платіж у Банці.
+        </p>
+        <p className="text-sm" style={{ color: theme.text }}>
+          {formatUah(pay.amount)}
+          <span className="mx-2" style={{ color: theme.muted }}>
+            ·
+          </span>
           <span className="font-mono">{pay.code}</span>
         </p>
         {qr ? <img src={qr} alt="QR на Банку" className="h-40 w-40 rounded-xl bg-white p-2" /> : null}
@@ -80,6 +87,9 @@ export function DonateForm({
             Відкрити Банку
           </button>
         </a>
+        <p className="text-xs" style={{ color: theme.muted }}>
+          Якщо поля порожні — перекажи рівно {formatUah(pay.amount)} і вкажи код {pay.code} у коментарі.
+        </p>
         <button type="button" className="text-sm transition-opacity hover:opacity-80" style={{ color: theme.muted }} onClick={() => setPay(null)}>
           Змінити дані
         </button>

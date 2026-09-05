@@ -108,7 +108,7 @@ export async function PATCH(req: Request) {
       minAmount: clamp(Math.round(body.minAmount ?? user.minAmount), 100, 1_000_000),
       overlayTone,
       overlayAccent,
-      overlayDuration: clamp(Math.round(body.overlayDuration ?? user.overlayDuration), 3, 20),
+      overlayDuration: clamp(Math.round(body.overlayDuration ?? user.overlayDuration), 3, 40),
       alertStyle,
       alertShowMessage: body.alertShowMessage ?? user.alertShowMessage,
       goalStyle,

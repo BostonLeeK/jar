@@ -37,7 +37,7 @@ function Stage({
   return (
     <div
       className={cn(
-        "flex min-h-[180px] items-end bg-[size:16px_16px] p-5",
+        "flex min-h-[220px] items-end bg-[size:16px_16px] p-5",
         backdrop === "dark"
           ? "bg-zinc-950 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.12)_1px,transparent_0)]"
           : "bg-zinc-100 bg-[radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.08)_1px,transparent_0)]",
@@ -65,7 +65,7 @@ export function WidgetPreviews({
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card className="overflow-hidden">
-        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Алерт · 800×200</p>
+        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Алерт · 800×400</p>
         <Stage backdrop={backdrop}>
           <AlertView donation={preview.donations[0] ?? SAMPLE[0]} state={preview} />
         </Stage>

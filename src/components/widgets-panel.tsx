@@ -46,7 +46,7 @@ export function WidgetsPanel({
   return (
     <div className="space-y-6">
       <Card className="space-y-4 p-5">
-        <CopyField label="Alert overlay" value={alertUrl} hint="Browser Source 800×200, прозорий фон." />
+        <CopyField label="Alert overlay" value={alertUrl} hint="Browser Source 800×400, прозорий фон, Control audio via OBS." />
         <CopyField label="Прогрес збору" value={goalUrl} hint="Browser Source 480×90." />
         <CopyField label="Останні донати" value={recentUrl} hint="Browser Source 360×280." />
         <div className="flex flex-wrap gap-2">

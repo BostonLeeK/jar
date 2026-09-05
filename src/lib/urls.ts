@@ -30,8 +30,26 @@ export function donatePath(slug: string) {
   return `/d/${slug}`;
 }
 
-export function jarPayUrl(sendId: string) {
-  return `https://send.monobank.ua/${sendId}`;
+function jarAmountParam(amountKopiyky: number) {
+  const uah = amountKopiyky / 100;
+  return Number.isInteger(uah) ? String(uah) : uah.toFixed(2);
+}
+
+function jarSendPath(sendId: string) {
+  const id = sendId.replace(/^\/+|\/+$/g, "").replace(/^jar\//i, "");
+  return `https://send.monobank.ua/jar/${id}`;
+}
+
+export function jarPayUrl(sendId: string, opts?: { amount?: number; comment?: string }) {
+  const url = new URL(jarSendPath(sendId));
+  if (opts?.amount && opts.amount > 0) {
+    url.searchParams.set("a", jarAmountParam(opts.amount));
+  }
+  const comment = opts?.comment?.trim().slice(0, 160);
+  if (comment) {
+    url.searchParams.set("t", comment);
+  }
+  return url.toString();
 }
 
 export function overlayPath(token: string, kind: "alert" | "goal" | "recent" = "alert") {

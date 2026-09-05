@@ -49,7 +49,7 @@ export async function POST(
   return NextResponse.json({
     code: pending.code,
     amount,
-    payUrl: jarPayUrl(user.monoSendId),
+    payUrl: jarPayUrl(user.monoSendId, { amount, comment: pending.code }),
     jarTitle: user.monoJarTitle,
   });
 }

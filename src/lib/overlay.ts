@@ -12,6 +12,20 @@ export function isOverlayStyle(value: string): value is OverlayStyle {
   return OVERLAY_STYLES.includes(value as OverlayStyle);
 }
 
+export type AlertTierConfig = {
+  id: string;
+  minAmount: number;
+  gifUrl: string | null;
+  audioUrl: string | null;
+  tts: boolean;
+};
+
+export function pickAlertTier(tiers: AlertTierConfig[], amount: number) {
+  return [...tiers]
+    .filter((tier) => amount >= tier.minAmount)
+    .sort((a, b) => b.minAmount - a.minAmount)[0] ?? null;
+}
+
 export function overlayPalette(tone: string) {
   if (tone === "light") {
     return {

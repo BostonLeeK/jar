@@ -51,10 +51,12 @@ model User {
   recentStyle       String  @default("minimal")
   recentLimit       Int     @default(5)
   recentTitle       String  @default("Останні донати")
+  alertTts          Boolean @default(false)
   pageViews         Int     @default(0)
 
-  donations Donation[]
-  pending   PendingDonation[]
+  donations  Donation[]
+  pending    PendingDonation[]
+  alertTiers AlertTier[]
 }
 
 model Donation {
@@ -69,6 +71,19 @@ model Donation {
 
   @@unique([userId, monoTxId])
   @@index([userId, createdAt])
+}
+
+model AlertTier {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  minAmount Int
+  gifUrl    String?
+  audioUrl  String?
+  tts       Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([userId, minAmount])
 }
 
 model PendingDonation {

@@ -1,9 +1,11 @@
 "use client";
 
+import { AlertTiersEditor } from "@/components/alert-tiers-editor";
 import { WidgetPreviews } from "@/components/widget-previews";
 import { WidgetsPanel } from "@/components/widgets-panel";
 import { Button, Card, FieldError, Input, Label } from "@/components/ui";
 import type { OverlayDonation, OverlayState } from "@/components/overlay-widgets";
+import type { AlertTierConfig } from "@/lib/overlay";
 import { cn } from "@/lib/cn";
 import { useMemo, useState, type FormEvent } from "react";
 
@@ -26,6 +28,8 @@ export function WidgetsStudio({
   recentStyle,
   recentLimit,
   recentTitle,
+  alertTts,
+  alertTiers,
   donations,
 }: {
   token: string;
@@ -43,6 +47,8 @@ export function WidgetsStudio({
   recentStyle: string;
   recentLimit: number;
   recentTitle: string;
+  alertTts: boolean;
+  alertTiers: AlertTierConfig[];
   donations: OverlayDonation[];
 }) {
   const [tone, setTone] = useState(overlayTone);
@@ -55,6 +61,7 @@ export function WidgetsStudio({
   const [recentLook, setRecentLook] = useState(recentStyle);
   const [limit, setLimit] = useState(String(recentLimit));
   const [title, setTitle] = useState(recentTitle);
+  const [tiers, setTiers] = useState(alertTiers);
   const [backdrop, setBackdrop] = useState<"dark" | "light">("dark");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,9 +84,11 @@ export function WidgetsStudio({
       recentStyle: recentLook,
       recentLimit: Number(limit) || 5,
       recentTitle: title,
+      alertTts,
+      alertTiers: tiers,
       donations,
     }),
-    [accent, alert, donations, duration, goal, goalLook, limit, name, raised, recentLook, showMessage, showTitle, title, tone],
+    [accent, alert, alertTts, donations, duration, goal, goalLook, limit, name, raised, recentLook, showMessage, showTitle, tiers, title, tone],
   );
 
   async function save(event: FormEvent) {
@@ -156,7 +165,7 @@ export function WidgetsStudio({
                 id="duration"
                 type="number"
                 min={3}
-                max={20}
+                max={40}
                 value={duration}
                 onChange={(event) => setDuration(event.target.value)}
               />
@@ -231,6 +240,8 @@ export function WidgetsStudio({
           {pending ? "Зберігаю…" : "Зберегти віджети"}
         </Button>
       </form>
+
+      <AlertTiersEditor initialTiers={alertTiers} initialTts={alertTts} onTiersChange={setTiers} />
 
       <div className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">

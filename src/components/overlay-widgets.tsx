@@ -1,9 +1,9 @@
 "use client";
 
 import { formatUah } from "@/lib/money";
-import { overlayPalette } from "@/lib/overlay";
+import { overlayPalette, pickAlertTier, type AlertTierConfig } from "@/lib/overlay";
 import { cn } from "@/lib/cn";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export type OverlayDonation = {
   id: string;
@@ -29,6 +29,8 @@ export type OverlayState = {
   recentStyle: string;
   recentLimit: number;
   recentTitle: string;
+  alertTts: boolean;
+  alertTiers: AlertTierConfig[];
   donations: OverlayDonation[];
 };
 
@@ -79,6 +81,60 @@ export function useOverlayAlerts(token: string, duration: number) {
   return current;
 }
 
+function speakDonation(text: string) {
+  if (!window.speechSynthesis || !text.trim()) {
+    return;
+  }
+  const utter = new SpeechSynthesisUtterance(text.trim());
+  utter.lang = "uk-UA";
+  utter.rate = 1;
+  const voice = window.speechSynthesis
+    .getVoices()
+    .find((item) => item.lang.toLowerCase().startsWith("uk"));
+  if (voice) {
+    utter.voice = voice;
+  }
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+export function useAlertEffects(donation: OverlayDonation | null, state: OverlayState | null) {
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  useEffect(() => {
+    const current = stateRef.current;
+    if (!donation || !current) {
+      return;
+    }
+    const tier = pickAlertTier(current.alertTiers, donation.amount);
+    const shouldSpeak = current.alertTts && (tier ? tier.tts : true) && Boolean(donation.message.trim());
+    let audio: HTMLAudioElement | null = null;
+    let cancelled = false;
+
+    const speak = () => {
+      if (!cancelled && shouldSpeak) {
+        speakDonation(donation.message);
+      }
+    };
+
+    window.speechSynthesis?.cancel();
+    if (tier?.audioUrl) {
+      audio = new Audio(tier.audioUrl);
+      audio.play().then(() => undefined).catch(speak);
+      audio.onended = speak;
+    } else {
+      speak();
+    }
+
+    return () => {
+      cancelled = true;
+      audio?.pause();
+      window.speechSynthesis?.cancel();
+    };
+  }, [donation]);
+}
+
 function Frame({
   style,
   tone,
@@ -116,14 +172,18 @@ export function AlertView({
   state,
 }: {
   donation: OverlayDonation | null;
-  state: Pick<OverlayState, "overlayTone" | "overlayAccent" | "alertStyle" | "alertShowMessage">;
+  state: OverlayState;
 }) {
   if (!donation) {
     return null;
   }
   const palette = overlayPalette(state.overlayTone);
+  const tier = pickAlertTier(state.alertTiers, donation.amount);
   return (
-    <Frame style={state.alertStyle} tone={state.overlayTone}>
+    <Frame style={state.alertStyle} tone={state.overlayTone} className="max-w-full">
+      {tier?.gifUrl ? (
+        <img src={tier.gifUrl} alt="" className="mb-3 max-h-52 max-w-full object-contain" />
+      ) : null}
       <p className="text-xl font-medium tracking-tight">
         <span style={{ color: state.overlayAccent }}>{donation.nickname}</span>
         <span className="mx-2" style={{ color: palette.dim }}>
