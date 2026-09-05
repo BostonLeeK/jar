@@ -155,54 +155,123 @@ function speakBrowser(text: string, lang: string) {
   window.speechSynthesis.speak(utter);
 }
 
-function speakDonation(text: string, token: string, lang: string) {
-  const spoken = text.trim();
-  if (!spoken) {
-    return null;
+function waitUntilEnd(audio: HTMLAudioElement) {
+  return new Promise<void>((resolve) => {
+    if (audio.ended || audio.error) {
+      resolve();
+      return;
+    }
+    const done = () => {
+      audio.removeEventListener("ended", done);
+      audio.removeEventListener("error", done);
+      resolve();
+    };
+    audio.addEventListener("ended", done);
+    audio.addEventListener("error", done);
+  });
+}
+
+async function playUntilEnd(src: string, attach?: (audio: HTMLAudioElement) => void) {
+  const audio = new Audio(src);
+  audio.preload = "auto";
+  attach?.(audio);
+  try {
+    await audio.play();
+    await waitUntilEnd(audio);
+  } catch {
+    return audio;
   }
-  const audio = new Audio(`/api/overlay/${encodeURIComponent(token)}/tts?text=${encodeURIComponent(spoken)}`);
-  audio.play().catch(() => speakBrowser(spoken, lang));
   return audio;
+}
+
+async function fetchTtsUrl(text: string, token: string) {
+  const res = await fetch(`/api/overlay/${encodeURIComponent(token)}/tts?text=${encodeURIComponent(text)}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error("tts");
+  }
+  const blob = await res.blob();
+  if (blob.size < 32) {
+    throw new Error("tts");
+  }
+  return URL.createObjectURL(blob);
 }
 
 export function useAlertEffects(donation: OverlayDonation | null, state: OverlayState | null, token: string) {
   const stateRef = useRef(state);
   stateRef.current = state;
+  const ready = Boolean(state);
+  const playingId = useRef<string | null>(null);
+  const nodes = useRef<{ sound: HTMLAudioElement | null; voice: HTMLAudioElement | null; url: string | null }>({
+    sound: null,
+    voice: null,
+    url: null,
+  });
+
+  useEffect(() => {
+    return () => {
+      nodes.current.sound?.pause();
+      nodes.current.voice?.pause();
+      window.speechSynthesis?.cancel();
+      if (nodes.current.url) {
+        URL.revokeObjectURL(nodes.current.url);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const current = stateRef.current;
-    if (!donation || !current) {
+    if (!donation || !current || playingId.current === donation.id) {
       return;
     }
+
+    nodes.current.sound?.pause();
+    nodes.current.voice?.pause();
+    window.speechSynthesis?.cancel();
+    if (nodes.current.url) {
+      URL.revokeObjectURL(nodes.current.url);
+    }
+    nodes.current = { sound: null, voice: null, url: null };
+    playingId.current = donation.id;
+
+    const alertId = donation.id;
     const tier = pickAlertVisual(current.alertTiers, donation, current.twitchAlerts);
     const spoken = donation.message.trim() || `${donation.nickname} ${formatAlertDetail(donation)}`;
     const shouldSpeak = current.alertTts && (tier ? tier.tts : true) && Boolean(spoken);
-    let sound: HTMLAudioElement | null = null;
-    let voice: HTMLAudioElement | null = null;
-    let cancelled = false;
+    const lang = current.ttsLang;
+    const ttsJob = shouldSpeak ? fetchTtsUrl(spoken, token).catch(() => null) : null;
 
-    const speak = () => {
-      if (!cancelled && shouldSpeak) {
-        voice = speakDonation(spoken, token, current.ttsLang);
+    void (async () => {
+      if (tier?.audioUrl) {
+        const sound = await playUntilEnd(tier.audioUrl, (item) => {
+          nodes.current.sound = item;
+        });
+        if (playingId.current !== alertId) {
+          sound.pause();
+          return;
+        }
       }
-    };
-
-    window.speechSynthesis?.cancel();
-    if (tier?.audioUrl) {
-      sound = new Audio(tier.audioUrl);
-      sound.play().then(() => undefined).catch(speak);
-      sound.onended = speak;
-    } else {
-      speak();
-    }
-
-    return () => {
-      cancelled = true;
-      sound?.pause();
-      voice?.pause();
-      window.speechSynthesis?.cancel();
-    };
-  }, [donation, token]);
+      if (playingId.current !== alertId || !shouldSpeak) {
+        return;
+      }
+      const url = ttsJob ? await ttsJob : null;
+      if (playingId.current !== alertId) {
+        if (url) {
+          URL.revokeObjectURL(url);
+        }
+        return;
+      }
+      if (url) {
+        nodes.current.url = url;
+        await playUntilEnd(url, (item) => {
+          nodes.current.voice = item;
+        });
+        return;
+      }
+      speakBrowser(spoken, lang);
+    })();
+  }, [donation, ready, token]);
 }
 
 function Frame({
