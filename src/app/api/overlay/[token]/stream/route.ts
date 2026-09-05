@@ -15,11 +15,11 @@ export async function GET(
   }
 
   const encoder = new TextEncoder();
-  let cleanup = () => undefined;
+  let cleanup: () => void = () => undefined;
   const stream = new ReadableStream({
     start(controller) {
       let closed = false;
-      let off = () => undefined;
+      let off: () => void = () => undefined;
       let ping: ReturnType<typeof setInterval> | undefined;
       const send = (payload: unknown) => {
         if (closed) {
