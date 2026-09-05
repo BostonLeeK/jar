@@ -1,13 +1,15 @@
-import { getAppUrl } from "@/lib/urls";
-
 export function twitchConfigured() {
   return Boolean(process.env.TWITCH_CLIENT_ID && process.env.TWITCH_CLIENT_SECRET);
 }
 
-export function twitchAuthorizeUrl(state: string) {
+function callbackUri(origin: string) {
+  return `${origin.replace(/\/$/, "")}/api/twitch/callback`;
+}
+
+export function twitchAuthorizeUrl(state: string, origin: string) {
   const params = new URLSearchParams({
     client_id: process.env.TWITCH_CLIENT_ID ?? "",
-    redirect_uri: `${getAppUrl()}/api/twitch/callback`,
+    redirect_uri: callbackUri(origin),
     response_type: "code",
     scope: "user:read:email",
     state,
@@ -15,7 +17,7 @@ export function twitchAuthorizeUrl(state: string) {
   return `https://id.twitch.tv/oauth2/authorize?${params.toString()}`;
 }
 
-export async function exchangeTwitchCode(code: string) {
+export async function exchangeTwitchCode(code: string, origin: string) {
   const res = await fetch("https://id.twitch.tv/oauth2/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -24,11 +26,12 @@ export async function exchangeTwitchCode(code: string) {
       client_secret: process.env.TWITCH_CLIENT_SECRET ?? "",
       code,
       grant_type: "authorization_code",
-      redirect_uri: `${getAppUrl()}/api/twitch/callback`,
+      redirect_uri: callbackUri(origin),
     }),
   });
   if (!res.ok) {
-    throw new Error("Не вдалося обміняти код Twitch");
+    const body = (await res.json().catch(() => null)) as { message?: string; error?: string } | null;
+    throw new Error(body?.message || body?.error || "Не вдалося обміняти код Twitch");
   }
   return (await res.json()) as { access_token: string };
 }

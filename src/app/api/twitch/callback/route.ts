@@ -1,23 +1,24 @@
 import { prisma } from "@/lib/prisma";
 import { verifyState } from "@/lib/session";
 import { exchangeTwitchCode, fetchTwitchUser } from "@/lib/twitch";
-import { getAppUrl } from "@/lib/urls";
+import { getPublicOrigin } from "@/lib/urls";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const appUrl = getAppUrl();
-  const fail = `${appUrl}/dashboard/twitch?error=1`;
+  const origin = getPublicOrigin(req);
+  const fail = (reason: string) =>
+    NextResponse.redirect(`${origin}/dashboard/twitch?error=${encodeURIComponent(reason)}`);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
 
   if (!code || !state) {
-    return NextResponse.redirect(fail);
+    return fail("немає code або state від Twitch");
   }
 
   try {
     const userId = await verifyState(state);
-    const tokens = await exchangeTwitchCode(code);
+    const tokens = await exchangeTwitchCode(code, origin);
     const profile = await fetchTwitchUser(tokens.access_token);
     await prisma.user.update({
       where: { id: userId },
@@ -28,8 +29,9 @@ export async function GET(req: Request) {
         twitchAvatar: profile.profile_image_url,
       },
     });
-    return NextResponse.redirect(`${appUrl}/dashboard/twitch`);
-  } catch {
-    return NextResponse.redirect(fail);
+    return NextResponse.redirect(`${origin}/dashboard/twitch`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "невідома помилка";
+    return fail(message);
   }
 }

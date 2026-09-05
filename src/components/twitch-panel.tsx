@@ -13,7 +13,7 @@ export function TwitchPanel({
 }: {
   user: SafeUser;
   configured: boolean;
-  error?: boolean;
+  error?: string;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -68,7 +68,9 @@ export function TwitchPanel({
               </p>
             </div>
           )}
-          {error ? <p className="text-sm text-red-400">Не вдалося підключити Twitch. Спробуй ще раз.</p> : null}
+          {error ? (
+            <p className="text-sm text-red-400">Не вдалося підключити Twitch. {error}</p>
+          ) : null}
         </div>
       )}
     </Card>
