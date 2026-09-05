@@ -8,7 +8,7 @@ export default async function CustomizePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Сторінка донатів</h1>
-        <p className="mt-1 text-sm text-zinc-500">Шаблон, текст і ціль збору.</p>
+        <p className="mt-1 text-sm text-zinc-500">Шаблон, текст, ціль або свій HTML / CSS.</p>
       </div>
       <PageEditor user={toSafeUser(user)} />
     </div>

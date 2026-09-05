@@ -4,6 +4,7 @@ import { isValidSlug } from "@/lib/slug";
 import { requireApiUser } from "@/lib/user";
 import { isOverlayStyle, isOverlayTone } from "@/lib/overlay";
 import { isPageThemeId } from "@/lib/themes";
+import { sanitizeCss, sanitizeHtml, TEMPLATE_LIMIT } from "@/lib/template";
 import { clamp, isEmail, isHexColor } from "@/lib/validate";
 import { NextResponse } from "next/server";
 
@@ -37,6 +38,18 @@ export async function PATCH(req: Request) {
     recentStyle?: string;
     recentLimit?: number;
     recentTitle?: string;
+    pageUseCustom?: boolean;
+    pageCustomHtml?: string;
+    pageCustomCss?: string;
+    alertUseCustom?: boolean;
+    alertCustomHtml?: string;
+    alertCustomCss?: string;
+    goalUseCustom?: boolean;
+    goalCustomHtml?: string;
+    goalCustomCss?: string;
+    recentUseCustom?: boolean;
+    recentCustomHtml?: string;
+    recentCustomCss?: string;
   }>(req);
 
   const name = body.name?.trim() ?? user.name;
@@ -116,6 +129,18 @@ export async function PATCH(req: Request) {
       recentStyle,
       recentLimit: clamp(Math.round(body.recentLimit ?? user.recentLimit), 1, 12),
       recentTitle,
+      pageUseCustom: body.pageUseCustom ?? user.pageUseCustom,
+      pageCustomHtml: sanitizeHtml((body.pageCustomHtml ?? user.pageCustomHtml).slice(0, TEMPLATE_LIMIT)),
+      pageCustomCss: sanitizeCss((body.pageCustomCss ?? user.pageCustomCss).slice(0, TEMPLATE_LIMIT)),
+      alertUseCustom: body.alertUseCustom ?? user.alertUseCustom,
+      alertCustomHtml: sanitizeHtml((body.alertCustomHtml ?? user.alertCustomHtml).slice(0, TEMPLATE_LIMIT)),
+      alertCustomCss: sanitizeCss((body.alertCustomCss ?? user.alertCustomCss).slice(0, TEMPLATE_LIMIT)),
+      goalUseCustom: body.goalUseCustom ?? user.goalUseCustom,
+      goalCustomHtml: sanitizeHtml((body.goalCustomHtml ?? user.goalCustomHtml).slice(0, TEMPLATE_LIMIT)),
+      goalCustomCss: sanitizeCss((body.goalCustomCss ?? user.goalCustomCss).slice(0, TEMPLATE_LIMIT)),
+      recentUseCustom: body.recentUseCustom ?? user.recentUseCustom,
+      recentCustomHtml: sanitizeHtml((body.recentCustomHtml ?? user.recentCustomHtml).slice(0, TEMPLATE_LIMIT)),
+      recentCustomCss: sanitizeCss((body.recentCustomCss ?? user.recentCustomCss).slice(0, TEMPLATE_LIMIT)),
     },
   });
 

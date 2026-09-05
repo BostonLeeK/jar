@@ -1,11 +1,23 @@
 "use client";
 
 import { AlertTiersEditor } from "@/components/alert-tiers-editor";
+import { TemplateEditor } from "@/components/template-editor";
 import { TwitchAlertsEditor } from "@/components/twitch-alerts-editor";
 import { WidgetPreviews } from "@/components/widget-previews";
 import { WidgetsPanel } from "@/components/widgets-panel";
 import { Button, Card, FieldError, Input, Label } from "@/components/ui";
 import type { OverlayDonation, OverlayState } from "@/components/overlay-widgets";
+import {
+  ALERT_TAGS,
+  DEFAULT_ALERT_CSS,
+  DEFAULT_ALERT_HTML,
+  DEFAULT_GOAL_CSS,
+  DEFAULT_GOAL_HTML,
+  DEFAULT_RECENT_CSS,
+  DEFAULT_RECENT_HTML,
+  GOAL_TAGS,
+  RECENT_TAGS,
+} from "@/lib/custom-defaults";
 import type { AlertTierConfig, TwitchAlertConfig } from "@/lib/overlay";
 import { cn } from "@/lib/cn";
 import { useMemo, useState, type FormEvent } from "react";
@@ -33,6 +45,16 @@ export function WidgetsStudio({
   alertTiers,
   twitchAlerts,
   donations,
+  alertUseCustom,
+  alertCustomHtml,
+  alertCustomCss,
+  goalUseCustom,
+  goalCustomHtml,
+  goalCustomCss,
+  recentUseCustom,
+  recentCustomHtml,
+  recentCustomCss,
+  twitchLogin,
 }: {
   token: string;
   appUrl: string;
@@ -53,6 +75,16 @@ export function WidgetsStudio({
   alertTiers: AlertTierConfig[];
   twitchAlerts: TwitchAlertConfig[];
   donations: OverlayDonation[];
+  alertUseCustom: boolean;
+  alertCustomHtml: string;
+  alertCustomCss: string;
+  goalUseCustom: boolean;
+  goalCustomHtml: string;
+  goalCustomCss: string;
+  recentUseCustom: boolean;
+  recentCustomHtml: string;
+  recentCustomCss: string;
+  twitchLogin: string | null;
 }) {
   const [tone, setTone] = useState(overlayTone);
   const [accent, setAccent] = useState(overlayAccent);
@@ -66,6 +98,16 @@ export function WidgetsStudio({
   const [title, setTitle] = useState(recentTitle);
   const [tiers, setTiers] = useState(alertTiers);
   const [twitch, setTwitch] = useState(twitchAlerts);
+  const [customTab, setCustomTab] = useState<"alert" | "goal" | "recent">("alert");
+  const [alertCustom, setAlertCustom] = useState(alertUseCustom);
+  const [alertHtml, setAlertHtml] = useState(alertCustomHtml || DEFAULT_ALERT_HTML);
+  const [alertCss, setAlertCss] = useState(alertCustomCss || DEFAULT_ALERT_CSS);
+  const [goalCustom, setGoalCustom] = useState(goalUseCustom);
+  const [goalHtml, setGoalHtml] = useState(goalCustomHtml || DEFAULT_GOAL_HTML);
+  const [goalCss, setGoalCss] = useState(goalCustomCss || DEFAULT_GOAL_CSS);
+  const [recentCustom, setRecentCustom] = useState(recentUseCustom);
+  const [recentHtml, setRecentHtml] = useState(recentCustomHtml || DEFAULT_RECENT_HTML);
+  const [recentCss, setRecentCss] = useState(recentCustomCss || DEFAULT_RECENT_CSS);
   const [backdrop, setBackdrop] = useState<"dark" | "light">("dark");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,8 +134,18 @@ export function WidgetsStudio({
       alertTiers: tiers,
       twitchAlerts: twitch,
       donations,
+      alertUseCustom: alertCustom,
+      alertCustomHtml: alertHtml,
+      alertCustomCss: alertCss,
+      goalUseCustom: goalCustom,
+      goalCustomHtml: goalHtml,
+      goalCustomCss: goalCss,
+      recentUseCustom: recentCustom,
+      recentCustomHtml: recentHtml,
+      recentCustomCss: recentCss,
+      twitchLogin,
     }),
-    [accent, alert, alertTts, donations, duration, goal, goalLook, limit, name, raised, recentLook, showMessage, showTitle, tiers, title, tone, twitch],
+    [accent, alert, alertCss, alertCustom, alertHtml, alertTts, donations, duration, goal, goalCss, goalCustom, goalHtml, goalLook, limit, name, raised, recentCss, recentCustom, recentHtml, recentLook, showMessage, showTitle, tiers, title, tone, twitch, twitchLogin],
   );
 
   async function save(event: FormEvent) {
@@ -115,6 +167,15 @@ export function WidgetsStudio({
         recentStyle: recentLook,
         recentLimit: Number(limit),
         recentTitle: title,
+        alertUseCustom: alertCustom,
+        alertCustomHtml: alertHtml,
+        alertCustomCss: alertCss,
+        goalUseCustom: goalCustom,
+        goalCustomHtml: goalHtml,
+        goalCustomCss: goalCss,
+        recentUseCustom: recentCustom,
+        recentCustomHtml: recentHtml,
+        recentCustomCss: recentCss,
       }),
     });
     const data = (await res.json()) as { error?: string };
@@ -241,6 +302,64 @@ export function WidgetsStudio({
 
         <FieldError>{error}</FieldError>
         {ok ? <p className="text-sm text-emerald-600">Збережено</p> : null}
+        <Card className="space-y-4 p-5">
+          <div>
+            <h2 className="text-sm font-medium">Просунутий HTML / CSS</h2>
+            <p className="mt-1 text-sm text-zinc-500">Свій макет алерту, прогресу і списку для OBS.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(
+              [
+                ["alert", "Алерт", alertCustom],
+                ["goal", "Прогрес", goalCustom],
+                ["recent", "Останні", recentCustom],
+              ] as const
+            ).map(([id, label, on]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setCustomTab(id)}
+                className={cn(
+                  "rounded-xl border px-3 py-1.5 text-sm",
+                  customTab === id ? "border-zinc-900 text-zinc-900" : "border-zinc-200 text-zinc-500",
+                )}
+              >
+                {label}
+                {on ? " · on" : ""}
+              </button>
+            ))}
+          </div>
+          {customTab === "alert" ? (
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 text-sm text-zinc-600">
+                <input type="checkbox" checked={alertCustom} onChange={(event) => setAlertCustom(event.target.checked)} />
+                Свій HTML для алерту
+              </label>
+              {alertCustom ? <TemplateEditor html={alertHtml} css={alertCss} tags={ALERT_TAGS} onHtml={setAlertHtml} onCss={setAlertCss} /> : null}
+            </div>
+          ) : null}
+          {customTab === "goal" ? (
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 text-sm text-zinc-600">
+                <input type="checkbox" checked={goalCustom} onChange={(event) => setGoalCustom(event.target.checked)} />
+                Свій HTML для прогресу
+              </label>
+              {goalCustom ? <TemplateEditor html={goalHtml} css={goalCss} tags={GOAL_TAGS} onHtml={setGoalHtml} onCss={setGoalCss} /> : null}
+            </div>
+          ) : null}
+          {customTab === "recent" ? (
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 text-sm text-zinc-600">
+                <input type="checkbox" checked={recentCustom} onChange={(event) => setRecentCustom(event.target.checked)} />
+                Свій HTML для списку
+              </label>
+              {recentCustom ? (
+                <TemplateEditor html={recentHtml} css={recentCss} tags={RECENT_TAGS} onHtml={setRecentHtml} onCss={setRecentCss} />
+              ) : null}
+            </div>
+          ) : null}
+        </Card>
+
         <Button type="submit" disabled={pending}>
           {pending ? "Зберігаю…" : "Зберегти віджети"}
         </Button>
@@ -281,7 +400,7 @@ export function WidgetsStudio({
         <WidgetPreviews state={preview} backdrop={backdrop} />
       </div>
 
-      <WidgetsPanel token={token} appUrl={appUrl} />
+      <WidgetsPanel token={token} appUrl={appUrl} twitchLogin={twitchLogin} />
     </div>
   );
 }

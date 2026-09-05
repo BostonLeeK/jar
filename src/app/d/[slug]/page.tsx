@@ -45,6 +45,11 @@ export default async function DonatePage({
         nickname: item.nickname,
         amount: item.amount,
       }))}
+      custom={{
+        enabled: user.pageUseCustom,
+        html: user.pageCustomHtml,
+        css: user.pageCustomCss,
+      }}
     />
   );
 }

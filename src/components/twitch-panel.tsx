@@ -2,7 +2,6 @@
 
 import { Button, Card } from "@/components/ui";
 import type { SafeUser } from "@/lib/user";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -35,13 +34,7 @@ export function TwitchPanel({
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               {user.twitchAvatar ? (
-                <Image
-                  src={user.twitchAvatar}
-                  alt=""
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 rounded-full"
-                />
+                <img src={user.twitchAvatar} alt="" className="h-10 w-10 rounded-full object-cover" />
               ) : null}
               <div>
                 <p className="text-sm font-medium">{user.twitchDisplayName}</p>

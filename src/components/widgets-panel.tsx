@@ -10,9 +10,11 @@ import { useState } from "react";
 export function WidgetsPanel({
   token,
   appUrl,
+  twitchLogin,
 }: {
   token: string;
   appUrl: string;
+  twitchLogin?: string | null;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -21,6 +23,7 @@ export function WidgetsPanel({
   const alertUrl = `${origin}${overlayPath(token)}`;
   const goalUrl = `${origin}${overlayPath(token, "goal")}`;
   const recentUrl = `${origin}${overlayPath(token, "recent")}`;
+  const chatUrl = `${origin}${overlayPath(token, "chat")}`;
 
   async function rotate() {
     setPending(true);
@@ -57,6 +60,11 @@ export function WidgetsPanel({
         <CopyField label="Alert overlay" value={alertUrl} hint="Browser Source 800×400, прозорий фон, Control audio via OBS." />
         <CopyField label="Прогрес збору" value={goalUrl} hint="Browser Source 480×90." />
         <CopyField label="Останні донати" value={recentUrl} hint="Browser Source 360×280." />
+        <CopyField
+          label="Чат Twitch"
+          value={chatUrl}
+          hint={twitchLogin ? "Browser Source 350×600." : "Підключи Twitch у кабінеті, інакше чат буде порожній."}
+        />
         <div className="flex flex-wrap gap-2">
           <Button type="button" onClick={() => testAlert()} disabled={testPending}>
             {testPending ? "Надсилаю…" : "Тест донат"}

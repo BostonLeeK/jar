@@ -50,6 +50,16 @@ export default async function WidgetsPage() {
           tts: tier.tts,
         }))}
         twitchAlerts={twitchAlerts.map(toTwitchAlertConfig)}
+        alertUseCustom={user.alertUseCustom}
+        alertCustomHtml={user.alertCustomHtml}
+        alertCustomCss={user.alertCustomCss}
+        goalUseCustom={user.goalUseCustom}
+        goalCustomHtml={user.goalCustomHtml}
+        goalCustomCss={user.goalCustomCss}
+        recentUseCustom={user.recentUseCustom}
+        recentCustomHtml={user.recentCustomHtml}
+        recentCustomCss={user.recentCustomCss}
+        twitchLogin={user.twitchLogin}
         donations={donations.map((item) => ({
           id: item.id,
           amount: item.amount,

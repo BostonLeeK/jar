@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   const progress = goal > 0 ? Math.min(100, Math.round((user.monoJarBalance / goal) * 100)) : 0;
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Привіт, {user.name}!</h1>
@@ -133,6 +133,16 @@ export default async function DashboardPage() {
           slug={user.slug}
           minAmount={user.minAmount}
           ready={Boolean(user.monoSendId)}
+          recent={donations.slice(0, 3).map((item) => ({
+            id: item.id,
+            nickname: item.nickname,
+            amount: item.amount,
+          }))}
+          custom={{
+            enabled: user.pageUseCustom,
+            html: user.pageCustomHtml,
+            css: user.pageCustomCss,
+          }}
         />
         <Card className="p-4">
           <p className="text-sm font-medium">Поділитись сторінкою</p>

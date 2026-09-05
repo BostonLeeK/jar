@@ -56,6 +56,18 @@ model User {
   recentTitle       String  @default("Останні донати")
   alertTts          Boolean @default(false)
   pageViews         Int     @default(0)
+  pageUseCustom     Boolean @default(false)
+  pageCustomHtml    String  @default("")
+  pageCustomCss     String  @default("")
+  alertUseCustom    Boolean @default(false)
+  alertCustomHtml   String  @default("")
+  alertCustomCss    String  @default("")
+  goalUseCustom     Boolean @default(false)
+  goalCustomHtml    String  @default("")
+  goalCustomCss     String  @default("")
+  recentUseCustom   Boolean @default(false)
+  recentCustomHtml  String  @default("")
+  recentCustomCss   String  @default("")
 
   donations    Donation[]
   pending      PendingDonation[]

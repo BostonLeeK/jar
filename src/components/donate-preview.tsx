@@ -1,4 +1,7 @@
-import { DonatePageView } from "@/components/donate-page";
+"use client";
+
+import { DonatePageView, type DonateRecent } from "@/components/donate-page";
+import { ScaledFrame } from "@/components/scaled-frame";
 import { getPageTheme } from "@/lib/themes";
 
 export function DonatePreview({
@@ -13,6 +16,8 @@ export function DonatePreview({
   slug,
   minAmount,
   ready,
+  recent = [],
+  custom,
 }: {
   name: string;
   bio: string;
@@ -25,11 +30,13 @@ export function DonatePreview({
   slug: string;
   minAmount: number;
   ready: boolean;
+  recent?: DonateRecent[];
+  custom?: { enabled: boolean; html: string; css: string };
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
       <div className="border-b border-zinc-200 px-4 py-2 text-xs font-medium text-zinc-500">Превʼю</div>
-      <div className="max-h-[720px] overflow-auto">
+      <ScaledFrame width={390} height={780}>
         <DonatePageView
           theme={getPageTheme(themeId)}
           title={name}
@@ -42,10 +49,11 @@ export function DonatePreview({
           slug={slug}
           minAmount={minAmount}
           ready={ready}
-          recent={[]}
+          recent={recent}
+          custom={custom}
           preview
         />
-      </div>
+      </ScaledFrame>
     </div>
   );
 }

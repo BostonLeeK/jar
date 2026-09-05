@@ -86,6 +86,18 @@ export function toSafeUser(user: User) {
     recentLimit: user.recentLimit,
     recentTitle: user.recentTitle,
     pageViews: user.pageViews,
+    pageUseCustom: user.pageUseCustom,
+    pageCustomHtml: user.pageCustomHtml,
+    pageCustomCss: user.pageCustomCss,
+    alertUseCustom: user.alertUseCustom,
+    alertCustomHtml: user.alertCustomHtml,
+    alertCustomCss: user.alertCustomCss,
+    goalUseCustom: user.goalUseCustom,
+    goalCustomHtml: user.goalCustomHtml,
+    goalCustomCss: user.goalCustomCss,
+    recentUseCustom: user.recentUseCustom,
+    recentCustomHtml: user.recentCustomHtml,
+    recentCustomCss: user.recentCustomCss,
   };
 }
 

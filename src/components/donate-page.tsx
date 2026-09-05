@@ -1,5 +1,8 @@
+import { CustomLayout } from "@/components/custom-markup";
 import { DonateForm } from "@/components/donate-form";
 import { formatUah } from "@/lib/money";
+import { DEFAULT_PAGE_CSS, DEFAULT_PAGE_HTML } from "@/lib/custom-defaults";
+import { escapeAttr, escapeHtml } from "@/lib/template";
 import type { PageTheme } from "@/lib/themes";
 import { cn } from "@/lib/cn";
 
@@ -23,6 +26,7 @@ export function DonatePageView({
   ready,
   recent,
   preview,
+  custom,
 }: {
   theme: PageTheme;
   title: string;
@@ -37,14 +41,52 @@ export function DonatePageView({
   ready: boolean;
   recent: DonateRecent[];
   preview?: boolean;
+  custom?: { enabled: boolean; html: string; css: string };
 }) {
   const progress = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+  const form = ready ? (
+    <DonateForm slug={slug} minAmount={minAmount} theme={theme} preview={preview} />
+  ) : (
+    <p className="text-sm" style={{ color: theme.muted }}>
+      Стрімер ще не підключив Банку.
+    </p>
+  );
+
+  if (custom?.enabled) {
+    return (
+      <div className={preview ? "h-full min-h-0" : "min-h-dvh"}>
+        {preview ? null : <style>{`html,body{min-height:100dvh;}`}</style>}
+        <CustomLayout
+          html={custom.html || DEFAULT_PAGE_HTML}
+          css={custom.css || DEFAULT_PAGE_CSS}
+          vars={{
+            title: escapeHtml(title),
+            bio: escapeHtml(bio),
+            avatar: avatar ? `<img class="jar-avatar" src="${escapeAttr(avatar)}" alt="">` : "",
+            twitch: twitchLogin
+              ? `<a href="https://twitch.tv/${escapeAttr(twitchLogin)}" target="_blank" rel="noreferrer">twitch.tv/${escapeHtml(twitchLogin)}</a>`
+              : "",
+            raised: escapeHtml(formatUah(raised)),
+            goal: escapeHtml(formatUah(goal)),
+            percent: String(progress),
+          }}
+          lists={{
+            recent: recent.map((item) => ({
+              nickname: escapeHtml(item.nickname),
+              amount: escapeHtml(formatUah(item.amount)),
+            })),
+          }}
+          slots={{ donate: form }}
+        />
+      </div>
+    );
+  }
   const cover = theme.layout === "cover";
   const split = theme.layout === "split";
 
   return (
     <div
-      className={cn("relative w-full overflow-x-hidden", preview ? "min-h-[640px]" : "min-h-dvh")}
+      className={cn("relative h-full w-full overflow-x-hidden", preview ? "min-h-0" : "min-h-dvh")}
       style={{ background: theme.background, color: theme.text }}
     >
       {preview ? null : (
@@ -139,13 +181,7 @@ export function DonatePageView({
             padding: theme.id === "mono" ? "28px" : "24px",
           }}
         >
-          {ready ? (
-            <DonateForm slug={slug} minAmount={minAmount} theme={theme} preview={preview} />
-          ) : (
-            <p className="text-sm" style={{ color: theme.muted }}>
-              Стрімер ще не підключив Банку.
-            </p>
-          )}
+          {form}
         </section>
       </div>
     </div>

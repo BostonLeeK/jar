@@ -2,7 +2,10 @@
 
 import { AvatarField } from "@/components/avatar-field";
 import { DonatePageView } from "@/components/donate-page";
+import { ScaledFrame } from "@/components/scaled-frame";
+import { TemplateEditor } from "@/components/template-editor";
 import { Button, Card, FieldError, Input, Label, Textarea } from "@/components/ui";
+import { DEFAULT_PAGE_CSS, DEFAULT_PAGE_HTML, PAGE_TAGS } from "@/lib/custom-defaults";
 import { kopiykyToUah, uahToKopiyky } from "@/lib/money";
 import { getPageTheme, PAGE_THEMES } from "@/lib/themes";
 import type { SafeUser } from "@/lib/user";
@@ -22,6 +25,9 @@ export function PageEditor({ user }: { user: SafeUser }) {
     showGoal: user.showGoal,
     goalAmount: String(kopiykyToUah(user.goalAmount || user.monoJarGoal)),
     minAmount: String(kopiykyToUah(user.minAmount)),
+    pageUseCustom: user.pageUseCustom,
+    pageCustomHtml: user.pageCustomHtml || DEFAULT_PAGE_HTML,
+    pageCustomCss: user.pageCustomCss || DEFAULT_PAGE_CSS,
   });
 
   const theme = getPageTheme(form.pageTheme);
@@ -40,6 +46,11 @@ export function PageEditor({ user }: { user: SafeUser }) {
       ready: Boolean(user.monoSendId),
       recent: [] as { id: string; nickname: string; amount: number }[],
       preview: true,
+      custom: {
+        enabled: form.pageUseCustom,
+        html: form.pageCustomHtml,
+        css: form.pageCustomCss,
+      },
     }),
     [avatar, form, theme, user],
   );
@@ -61,6 +72,9 @@ export function PageEditor({ user }: { user: SafeUser }) {
         showGoal: form.showGoal,
         goalAmount: uahToKopiyky(Number(form.goalAmount) || 0),
         minAmount: uahToKopiyky(Number(form.minAmount) || 10),
+        pageUseCustom: form.pageUseCustom,
+        pageCustomHtml: form.pageCustomHtml,
+        pageCustomCss: form.pageCustomCss,
       }),
     });
     const data = (await res.json()) as { error?: string };
@@ -171,6 +185,28 @@ export function PageEditor({ user }: { user: SafeUser }) {
           </label>
         </Card>
 
+        <Card className="space-y-4 p-5">
+          <label className="flex items-center gap-2 text-sm font-medium text-zinc-800">
+            <input
+              type="checkbox"
+              checked={form.pageUseCustom}
+              onChange={(event) => setForm((prev) => ({ ...prev, pageUseCustom: event.target.checked }))}
+            />
+            Просунутий HTML / CSS
+          </label>
+          {form.pageUseCustom ? (
+            <TemplateEditor
+              html={form.pageCustomHtml}
+              css={form.pageCustomCss}
+              tags={PAGE_TAGS}
+              onHtml={(pageCustomHtml) => setForm((prev) => ({ ...prev, pageCustomHtml }))}
+              onCss={(pageCustomCss) => setForm((prev) => ({ ...prev, pageCustomCss }))}
+            />
+          ) : (
+            <p className="text-sm text-zinc-500">Свій макет замість готового шаблону. Форма донату — тег {"{{donate}}"}.</p>
+          )}
+        </Card>
+
         <FieldError>{error}</FieldError>
         <Button type="submit" disabled={pending}>
           {pending ? "Зберігаю…" : "Зберегти сторінку"}
@@ -184,7 +220,9 @@ export function PageEditor({ user }: { user: SafeUser }) {
             Відкрити
           </a>
         </div>
-        <DonatePageView {...preview} />
+        <ScaledFrame width={720} height={920}>
+          <DonatePageView {...preview} />
+        </ScaledFrame>
       </div>
     </div>
   );

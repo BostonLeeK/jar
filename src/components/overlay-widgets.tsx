@@ -1,8 +1,11 @@
 "use client";
 
 import { formatAlertDetail, type AlertKind } from "@/lib/alerts";
+import { CustomBlock } from "@/components/custom-markup";
+import { DEFAULT_ALERT_CSS, DEFAULT_ALERT_HTML, DEFAULT_GOAL_CSS, DEFAULT_GOAL_HTML, DEFAULT_RECENT_CSS, DEFAULT_RECENT_HTML } from "@/lib/custom-defaults";
 import { formatUah } from "@/lib/money";
 import { overlayPalette, pickAlertVisual, type AlertTierConfig, type TwitchAlertConfig } from "@/lib/overlay";
+import { escapeAttr, escapeHtml } from "@/lib/template";
 import { cn } from "@/lib/cn";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
@@ -17,6 +20,7 @@ export type OverlayDonation = {
 
 export type OverlayState = {
   name: string;
+  twitchLogin: string | null;
   accentColor: string;
   showGoal: boolean;
   raised: number;
@@ -35,6 +39,15 @@ export type OverlayState = {
   alertTiers: AlertTierConfig[];
   twitchAlerts: TwitchAlertConfig[];
   donations: OverlayDonation[];
+  alertUseCustom: boolean;
+  alertCustomHtml: string;
+  alertCustomCss: string;
+  goalUseCustom: boolean;
+  goalCustomHtml: string;
+  goalCustomCss: string;
+  recentUseCustom: boolean;
+  recentCustomHtml: string;
+  recentCustomCss: string;
 };
 
 export function useOverlayState(token: string) {
@@ -224,6 +237,22 @@ export function AlertView({
   }
   const palette = overlayPalette(state.overlayTone);
   const tier = pickAlertVisual(state.alertTiers, donation, state.twitchAlerts);
+  if (state.alertUseCustom) {
+    return (
+      <CustomBlock
+        html={state.alertCustomHtml || DEFAULT_ALERT_HTML}
+        css={state.alertCustomCss || DEFAULT_ALERT_CSS}
+        vars={{
+          nickname: escapeHtml(donation.nickname),
+          amount: escapeHtml(formatAlertDetail(donation)),
+          message: state.alertShowMessage ? escapeHtml(donation.message) : "",
+          kind: escapeHtml(donation.kind || "donation"),
+          detail: escapeHtml(formatAlertDetail(donation)),
+          gif: tier?.gifUrl ? `<img class="jar-gif" src="${escapeAttr(tier.gifUrl)}" alt="">` : "",
+        }}
+      />
+    );
+  }
   return (
     <Frame style={state.alertStyle} tone={state.overlayTone} className="max-w-full">
       {tier?.gifUrl ? (
@@ -251,6 +280,20 @@ export function GoalView({ state }: { state: OverlayState }) {
   }
   const progress = Math.min(100, Math.round((state.raised / state.goal) * 100));
   const palette = overlayPalette(state.overlayTone);
+  if (state.goalUseCustom) {
+    return (
+      <CustomBlock
+        html={state.goalCustomHtml || DEFAULT_GOAL_HTML}
+        css={state.goalCustomCss || DEFAULT_GOAL_CSS}
+        vars={{
+          title: escapeHtml(state.name),
+          raised: escapeHtml(formatUah(state.raised)),
+          goal: escapeHtml(formatUah(state.goal)),
+          percent: String(progress),
+        }}
+      />
+    );
+  }
   return (
     <Frame style={state.goalStyle} tone={state.overlayTone} className="w-[440px] max-w-full">
       {state.goalShowTitle ? (
@@ -275,6 +318,21 @@ export function GoalView({ state }: { state: OverlayState }) {
 export function RecentView({ state }: { state: OverlayState }) {
   const palette = overlayPalette(state.overlayTone);
   const items = state.donations.slice(0, Math.max(1, state.recentLimit));
+  if (state.recentUseCustom) {
+    return (
+      <CustomBlock
+        html={state.recentCustomHtml || DEFAULT_RECENT_HTML}
+        css={state.recentCustomCss || DEFAULT_RECENT_CSS}
+        vars={{ title: escapeHtml(state.recentTitle || "Останні донати") }}
+        lists={{
+          items: items.map((item) => ({
+            nickname: escapeHtml(item.nickname),
+            amount: escapeHtml(formatUah(item.amount)),
+          })),
+        }}
+      />
+    );
+  }
   return (
     <Frame style={state.recentStyle} tone={state.overlayTone} className="w-[320px] max-w-full">
       <p className="mb-2 text-xs uppercase tracking-[0.16em]" style={{ color: palette.dim }}>

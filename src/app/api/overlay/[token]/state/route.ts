@@ -30,6 +30,7 @@ export async function GET(
 
   return NextResponse.json({
     name: user.pageTitle || user.name,
+    twitchLogin: user.twitchLogin,
     accentColor: user.overlayAccent || user.accentColor,
     showGoal: user.showGoal,
     raised,
@@ -53,6 +54,15 @@ export async function GET(
       tts: tier.tts,
     })),
     twitchAlerts: twitchAlerts.map(toTwitchAlertConfig),
+    alertUseCustom: user.alertUseCustom,
+    alertCustomHtml: user.alertCustomHtml,
+    alertCustomCss: user.alertCustomCss,
+    goalUseCustom: user.goalUseCustom,
+    goalCustomHtml: user.goalCustomHtml,
+    goalCustomCss: user.goalCustomCss,
+    recentUseCustom: user.recentUseCustom,
+    recentCustomHtml: user.recentCustomHtml,
+    recentCustomCss: user.recentCustomCss,
     donations: user.donations.map((item) => ({
       id: item.id,
       amount: item.amount,

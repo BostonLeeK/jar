@@ -52,12 +52,15 @@ export function jarPayUrl(sendId: string, opts?: { amount?: number; comment?: st
   return url.toString();
 }
 
-export function overlayPath(token: string, kind: "alert" | "goal" | "recent" = "alert") {
+export function overlayPath(token: string, kind: "alert" | "goal" | "recent" | "chat" = "alert") {
   if (kind === "goal") {
     return `/overlay/${token}/goal`;
   }
   if (kind === "recent") {
     return `/overlay/${token}/recent`;
+  }
+  if (kind === "chat") {
+    return `/overlay/${token}/chat`;
   }
   return `/overlay/${token}`;
 }
