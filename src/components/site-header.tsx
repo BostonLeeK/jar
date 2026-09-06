@@ -19,8 +19,8 @@ export function SiteHeader({ authed, marketing }: { authed?: boolean; marketing?
             <a href="#features" className="hover:text-zinc-900">
               Можливості
             </a>
-            <a href="#templates" className="hover:text-zinc-900">
-              Шаблони
+            <a href="#builder" className="hover:text-zinc-900">
+              Конструктор
             </a>
             <a href="#faq" className="hover:text-zinc-900">
               FAQ

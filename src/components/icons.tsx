@@ -60,6 +60,15 @@ export function IconChart(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconLink(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M10 13a5 5 0 0 0 7.5.4l1.1-1.1a5 5 0 0 0-7.1-7.1L10.4 6.3" />
+      <path d="M14 11a5 5 0 0 0-7.5-.4l-1.1 1.1a5 5 0 0 0 7.1 7.1l1.1-1.1" />
+    </Icon>
+  );
+}
+
 export function IconSettings(props: SVGProps<SVGSVGElement>) {
   return (
     <Icon {...props}>
@@ -75,6 +84,72 @@ export function IconAsset(props: SVGProps<SVGSVGElement>) {
       <rect x="3" y="6" width="18" height="12" rx="2" />
       <path d="M3 15l4.2-3.4a2 2 0 0 1 2.5 0L14 15l1.6-1.3a2 2 0 0 1 2.4 0L21 16" />
       <circle cx="9" cy="10" r="1.2" fill="currentColor" stroke="none" />
+    </Icon>
+  );
+}
+
+export function IconBolt(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+    </Icon>
+  );
+}
+
+export function IconShare(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <circle cx="18" cy="5" r="2.4" />
+      <circle cx="6" cy="12" r="2.4" />
+      <circle cx="18" cy="19" r="2.4" />
+      <path d="m8.2 10.7 7.6-4.4M8.2 13.3l7.6 4.4" />
+    </Icon>
+  );
+}
+
+export function IconGrip(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
+      <circle cx="9" cy="7" r="1.35" />
+      <circle cx="15" cy="7" r="1.35" />
+      <circle cx="9" cy="12" r="1.35" />
+      <circle cx="15" cy="12" r="1.35" />
+      <circle cx="9" cy="17" r="1.35" />
+      <circle cx="15" cy="17" r="1.35" />
+    </svg>
+  );
+}
+
+export function IconUser(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <circle cx="12" cy="8" r="3.2" />
+      <path d="M5 19c1.4-3 4-4.5 7-4.5S17.6 16 19 19" />
+    </Icon>
+  );
+}
+
+export function IconHeart(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="M12 19s-7-4.4-7-9a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 4.6-7 9-7 9z" />
+    </Icon>
+  );
+}
+
+export function IconCheck(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <path d="m5 12 4.5 4.5L19 7" />
+    </Icon>
+  );
+}
+
+export function IconToggle(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Icon {...props}>
+      <rect x="3" y="8" width="18" height="8" rx="4" />
+      <circle cx="15" cy="12" r="2.4" fill="currentColor" stroke="none" />
     </Icon>
   );
 }

@@ -35,7 +35,6 @@ export async function GET(req: Request) {
           name: profile.name.slice(0, 40) || "Streamer",
           slug: await allocateSlug(profile.name),
           googleId: profile.id,
-          avatarUrl: profile.picture,
           pageTitle: profile.name.slice(0, 60),
         },
       }));
@@ -45,13 +44,12 @@ export async function GET(req: Request) {
       return NextResponse.redirect(`${origin}/dashboard`);
     }
 
-    await prisma.user.update({
-      where: { id: existing.id },
-      data: {
-        googleId: existing.googleId ?? profile.id,
-        avatarUrl: existing.avatarUrl ?? profile.picture,
-      },
-    });
+    if (!existing.googleId) {
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: { googleId: profile.id },
+      });
+    }
     await createSession(existing.id);
     return NextResponse.redirect(`${origin}/dashboard`);
   } catch (error) {

@@ -56,7 +56,7 @@ function CreatorCard({ creator }: { creator: LandingCreator }) {
   return (
     <Link
       href={donatePath(creator.slug)}
-      className="group overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-all duration-150 hover:-translate-y-px hover:shadow-sm"
+      className="group overflow-hidden rounded-2xl border border-zinc-200 bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
     >
       <div className="relative h-44 overflow-hidden" style={{ background: theme.background, color: theme.text }}>
         {creator.cover ? (
