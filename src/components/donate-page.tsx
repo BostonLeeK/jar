@@ -2,6 +2,7 @@ import { CustomLayout } from "@/components/custom-markup";
 import { DonateForm } from "@/components/donate-form";
 import { DonateChrome } from "@/components/donate-share";
 import { LogoMark } from "@/components/icons";
+import Link from "next/link";
 import { formatUah } from "@/lib/money";
 import { DEFAULT_PAGE_CSS, DEFAULT_PAGE_HTML } from "@/lib/custom-defaults";
 import { escapeAttr, escapeHtml } from "@/lib/template";
@@ -58,6 +59,20 @@ function ThemeArt({ theme }: { theme: PageTheme }) {
       className="h-full w-full"
       style={{ background: "radial-gradient(ellipse at 62% 38%, #5a5a5a 0%, #1a1a1a 42%, #0a0a0a 100%)" }}
     />
+  );
+}
+
+function SiteLogo({
+  tone,
+  className,
+}: {
+  tone?: "light" | "dark";
+  className?: string;
+}) {
+  return (
+    <Link href="/" aria-label="Повернутися на Jar" className={cn("inline-flex shrink-0", className)}>
+      <LogoMark tone={tone} className="h-7" />
+    </Link>
   );
 }
 
@@ -136,8 +151,9 @@ export function DonatePageView({
 
   if (custom?.enabled) {
     return (
-      <div className={preview ? "h-full min-h-0" : "min-h-dvh"}>
+      <div className={cn("relative", preview ? "h-full min-h-0" : "min-h-dvh")}>
         {preview ? null : <style>{`html,body{min-height:100dvh;}`}</style>}
+        <SiteLogo tone={theme.tone} className="absolute left-5 top-4 z-20" />
         <CustomLayout
           html={custom.html || DEFAULT_PAGE_HTML}
           css={custom.css || DEFAULT_PAGE_CSS}
@@ -191,7 +207,7 @@ export function DonatePageView({
         )}
       >
         <header className="flex items-center justify-between gap-3">
-          <LogoMark tone={theme.tone} className="h-7" />
+          <SiteLogo tone={theme.tone} />
           <DonateChrome slug={slug} color={theme.text} border={theme.border} preview={preview} />
         </header>
 
