@@ -78,16 +78,18 @@ model User {
   recentCustomHtml  String  @default("")
   recentCustomCss   String  @default("")
 
-  donations    Donation[]
-  pending      PendingDonation[]
-  alertTiers   AlertTier[]
-  twitchAlerts TwitchAlert[]
+  donations           Donation[]
+  pending             PendingDonation[]
+  alertTiers          AlertTier[]
+  twitchAlerts        TwitchAlert[]
+  monobankConnection  MonobankConnection?
 }
 
 model Donation {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider  String   @default("monobank")
   monoTxId  String
   amount    Int
   nickname  String
@@ -95,7 +97,23 @@ model Donation {
   createdAt DateTime @default(now())
 
   @@unique([userId, monoTxId])
+  @@unique([provider, monoTxId])
   @@index([userId, createdAt])
+}
+
+model MonobankConnection {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestId         String    @unique
+  status            String
+  createdAt         DateTime  @default(now())
+  connectedAt       DateTime?
+  clientName        String?
+  selectedAccountId String?
+  lastStatementTime Int?
+
+  @@index([selectedAccountId])
 }
 
 model AlertTier {
