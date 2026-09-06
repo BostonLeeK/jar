@@ -54,6 +54,7 @@ model User {
   overlayTone       String  @default("dark")
   overlayAccent     String  @default("#ffffff")
   overlayDuration   Int     @default(8)
+  overlayChatDuration Int   @default(30)
   alertStyle        String  @default("minimal")
   alertShowMessage  Boolean @default(true)
   goalStyle         String  @default("minimal")

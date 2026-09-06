@@ -18,6 +18,7 @@ import {
   GOAL_TAGS,
   RECENT_TAGS,
 } from "@/lib/custom-defaults";
+import { CHAT_DURATION_DEFAULT, CHAT_DURATION_MAX, CHAT_DURATION_MIN } from "@/lib/chat";
 import type { AlertTierConfig, TwitchAlertConfig } from "@/lib/overlay";
 import { normalizeTtsLang, type TtsLang } from "@/lib/tts";
 import { cn } from "@/lib/cn";
@@ -35,6 +36,7 @@ export function WidgetsStudio({
   overlayTone,
   overlayAccent,
   overlayDuration,
+  overlayChatDuration,
   alertStyle,
   alertShowMessage,
   goalStyle,
@@ -66,6 +68,7 @@ export function WidgetsStudio({
   overlayTone: string;
   overlayAccent: string;
   overlayDuration: number;
+  overlayChatDuration: number;
   alertStyle: string;
   alertShowMessage: boolean;
   goalStyle: string;
@@ -92,6 +95,7 @@ export function WidgetsStudio({
   const [tone, setTone] = useState(overlayTone);
   const [accent, setAccent] = useState(overlayAccent);
   const [duration, setDuration] = useState(String(overlayDuration));
+  const [chatDuration, setChatDuration] = useState(String(overlayChatDuration));
   const [alert, setAlert] = useState(alertStyle);
   const [showMessage, setShowMessage] = useState(alertShowMessage);
   const [goalLook, setGoalLook] = useState(goalStyle);
@@ -127,6 +131,7 @@ export function WidgetsStudio({
       overlayTone: tone,
       overlayAccent: accent,
       overlayDuration: Number(duration) || 8,
+      overlayChatDuration: Number(chatDuration) || CHAT_DURATION_DEFAULT,
       alertStyle: alert,
       alertShowMessage: showMessage,
       goalStyle: goalLook,
@@ -150,7 +155,7 @@ export function WidgetsStudio({
       recentCustomCss: recentCss,
       twitchLogin,
     }),
-    [accent, alert, alertCss, alertCustom, alertHtml, alertTts, donations, duration, goal, goalCss, goalCustom, goalHtml, goalLook, limit, name, raised, recentCss, recentCustom, recentHtml, recentLook, showMessage, showTitle, tiers, title, tone, twitch, twitchLogin, voiceLang],
+    [accent, alert, alertCss, alertCustom, alertHtml, alertTts, chatDuration, donations, duration, goal, goalCss, goalCustom, goalHtml, goalLook, limit, name, raised, recentCss, recentCustom, recentHtml, recentLook, showMessage, showTitle, tiers, title, tone, twitch, twitchLogin, voiceLang],
   );
 
   async function save(event: FormEvent) {
@@ -165,6 +170,7 @@ export function WidgetsStudio({
         overlayTone: tone,
         overlayAccent: accent,
         overlayDuration: Number(duration),
+        overlayChatDuration: Number(chatDuration),
         alertStyle: alert,
         alertShowMessage: showMessage,
         goalStyle: goalLook,
@@ -198,7 +204,7 @@ export function WidgetsStudio({
         <Card className="space-y-4 p-5">
           <div>
             <h2 className="text-sm font-medium">Загальні</h2>
-            <p className="mt-1 text-sm text-zinc-500">Тема тексту і акцент для всіх трьох віджетів.</p>
+            <p className="mt-1 text-sm text-zinc-500">Тема тексту і акцент для всіх віджетів.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -224,7 +230,7 @@ export function WidgetsStudio({
           </div>
         </Card>
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2">
           <Card className="space-y-4 p-5">
             <div>
               <h2 className="text-sm font-medium">Алерт</h2>
@@ -303,6 +309,56 @@ export function WidgetsStudio({
               <Input id="recentTitle" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={40} />
             </div>
           </Card>
+
+          <Card className="space-y-4 p-5">
+            <div>
+              <h2 className="text-sm font-medium">Чат</h2>
+              <p className="mt-1 text-sm text-zinc-500">Як довго рядок лишається на екрані, перш ніж згасне.</p>
+            </div>
+            <div>
+              <Label htmlFor="chatDuration">Тривалість повідомлення, сек</Label>
+              <Input
+                id="chatDuration"
+                type="number"
+                min={CHAT_DURATION_MIN}
+                max={CHAT_DURATION_MAX}
+                value={chatDuration}
+                onChange={(event) => setChatDuration(event.target.value)}
+              />
+            </div>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-medium">Превʼю</h2>
+              <p className="mt-1 text-sm text-zinc-500">Перевір вигляд на чорному і білому фоні, як різні сцени в OBS.</p>
+            </div>
+            <div className="flex rounded-xl border border-zinc-200 bg-white p-1">
+              <button
+                type="button"
+                onClick={() => setBackdrop("dark")}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-sm transition-colors",
+                  backdrop === "dark" ? "bg-zinc-900 text-white" : "text-zinc-500 hover:text-zinc-900",
+                )}
+              >
+                Чорний
+              </button>
+              <button
+                type="button"
+                onClick={() => setBackdrop("light")}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-sm transition-colors",
+                  backdrop === "light" ? "bg-zinc-900 text-white" : "text-zinc-500 hover:text-zinc-900",
+                )}
+              >
+                Білий
+              </button>
+            </div>
+          </div>
+          <WidgetPreviews state={preview} backdrop={backdrop} />
         </div>
 
         <FieldError>{error}</FieldError>
@@ -378,38 +434,6 @@ export function WidgetsStudio({
         onTtsLangChange={setVoiceLang}
       />
       <TwitchAlertsEditor initialAlerts={twitchAlerts} onChange={setTwitch} />
-
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-medium">Превʼю</h2>
-            <p className="mt-1 text-sm text-zinc-500">Перевір вигляд на чорному і білому фоні, як різні сцени в OBS.</p>
-          </div>
-          <div className="flex rounded-xl border border-zinc-200 bg-white p-1">
-            <button
-              type="button"
-              onClick={() => setBackdrop("dark")}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-sm transition-colors",
-                backdrop === "dark" ? "bg-zinc-900 text-white" : "text-zinc-500 hover:text-zinc-900",
-              )}
-            >
-              Чорний
-            </button>
-            <button
-              type="button"
-              onClick={() => setBackdrop("light")}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-sm transition-colors",
-                backdrop === "light" ? "bg-zinc-900 text-white" : "text-zinc-500 hover:text-zinc-900",
-              )}
-            >
-              Білий
-            </button>
-          </div>
-        </div>
-        <WidgetPreviews state={preview} backdrop={backdrop} />
-      </div>
 
       <WidgetsPanel token={token} appUrl={appUrl} twitchLogin={twitchLogin} />
     </div>

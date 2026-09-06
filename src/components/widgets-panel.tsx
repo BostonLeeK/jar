@@ -32,26 +32,25 @@ export function WidgetsPanel({
     router.refresh();
   }
 
-  async function testAlert(kind?: "follow" | "sub") {
+  async function postTest(url: string, body: object) {
     setTestPending(true);
-    if (kind) {
-      await fetch("/api/alerts/test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind }),
-      });
-    } else {
-      await fetch("/api/donations/test", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nickname: "boston_fan",
-          amount: 200,
-          message: "запускай Condemned",
-        }),
-      });
-    }
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
     setTestPending(false);
+  }
+
+  function testAlert(kind?: "follow" | "sub") {
+    if (kind) {
+      return postTest("/api/alerts/test", { kind });
+    }
+    return postTest("/api/donations/test", {
+      nickname: "boston_fan",
+      amount: 200,
+      message: "запускай Condemned",
+    });
   }
 
   return (
@@ -69,8 +68,8 @@ export function WidgetsPanel({
           value={chatUrl}
           hint={
             twitchLogin
-              ? "Browser Source 720×900, прозорий фон. Scale залиш 100%."
-              : "Підключи Twitch у кабінеті, інакше чат буде порожній."
+              ? "Browser Source 720×900, прозорий фон. Scale залиш 100%. «Тест чат» покаже кілька повідомлень у OBS."
+              : "Browser Source 720×900. Натисни «Тест чат», щоб налаштувати віджет. Для живого чату підключи Twitch."
           }
         />
         <div className="flex flex-wrap gap-2">
@@ -82,6 +81,9 @@ export function WidgetsPanel({
           </Button>
           <Button type="button" variant="secondary" onClick={() => testAlert("sub")} disabled={testPending}>
             Тест підписка
+          </Button>
+          <Button type="button" variant="secondary" onClick={() => postTest("/api/chat/test", {})} disabled={testPending}>
+            Тест чат
           </Button>
           <ClearTestDonations />
           <Button type="button" variant="secondary" onClick={rotate} disabled={pending}>

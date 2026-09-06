@@ -39,6 +39,7 @@ export async function GET(
     overlayTone: user.overlayTone,
     overlayAccent: user.overlayAccent || user.accentColor,
     overlayDuration: user.overlayDuration,
+    overlayChatDuration: user.overlayChatDuration,
     alertStyle: user.alertStyle,
     alertShowMessage: user.alertShowMessage,
     goalStyle: user.goalStyle,

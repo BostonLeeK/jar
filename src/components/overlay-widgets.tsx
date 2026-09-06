@@ -2,6 +2,7 @@
 
 import { formatAlertDetail, type AlertKind } from "@/lib/alerts";
 import { CustomBlock } from "@/components/custom-markup";
+import { useOverlayStream } from "@/components/overlay-stream";
 import { DEFAULT_ALERT_CSS, DEFAULT_ALERT_HTML, DEFAULT_GOAL_CSS, DEFAULT_GOAL_HTML, DEFAULT_RECENT_CSS, DEFAULT_RECENT_HTML } from "@/lib/custom-defaults";
 import { formatUah } from "@/lib/money";
 import { clipRange } from "@/lib/audio-clip";
@@ -29,6 +30,7 @@ export type OverlayState = {
   overlayTone: string;
   overlayAccent: string;
   overlayDuration: number;
+  overlayChatDuration: number;
   alertStyle: string;
   alertShowMessage: boolean;
   goalStyle: string;
@@ -79,63 +81,23 @@ export function useOverlayAlerts(token: string, duration: number) {
   const [current, setCurrent] = useState<OverlayDonation | null>(null);
   const durationRef = useRef(duration);
   durationRef.current = duration;
+  const hideRef = useRef<number | undefined>(undefined);
 
-  useEffect(() => {
-    let source: EventSource | null = null;
-    let hide: number | undefined;
-    let watchdog: number | undefined;
-    let reconnect: number | undefined;
-    let stopped = false;
-
-    function arm() {
-      window.clearTimeout(watchdog);
-      watchdog = window.setTimeout(connect, 40000);
+  useOverlayStream(token, (payload) => {
+    if (payload.type !== "donation" && payload.type !== "alert") {
+      return;
     }
+    setCurrent(payload as unknown as OverlayDonation);
+    window.clearTimeout(hideRef.current);
+    hideRef.current = window.setTimeout(() => setCurrent(null), durationRef.current * 1000);
+  });
 
-    function connect() {
-      window.clearTimeout(reconnect);
-      source?.close();
-      if (stopped) {
-        return;
-      }
-      source = new EventSource(`/api/overlay/${token}/stream`);
-      source.onopen = arm;
-      source.onmessage = (event) => {
-        arm();
-        const payload = JSON.parse(event.data) as { type: string } & OverlayDonation;
-        if (payload.type !== "donation" && payload.type !== "alert") {
-          return;
-        }
-        setCurrent(payload);
-        window.clearTimeout(hide);
-        hide = window.setTimeout(() => setCurrent(null), durationRef.current * 1000);
-      };
-      source.onerror = () => {
-        source?.close();
-        if (!stopped) {
-          window.clearTimeout(reconnect);
-          reconnect = window.setTimeout(connect, 1500);
-        }
-      };
-      arm();
-    }
-
-    connect();
-    const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        connect();
-      }
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      stopped = true;
-      source?.close();
-      window.clearTimeout(hide);
-      window.clearTimeout(watchdog);
-      window.clearTimeout(reconnect);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [token]);
+  useEffect(
+    () => () => {
+      window.clearTimeout(hideRef.current);
+    },
+    [],
+  );
 
   return current;
 }

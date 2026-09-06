@@ -7,18 +7,10 @@ import { useParams } from "next/navigation";
 export default function ChatOverlayPage() {
   const params = useParams<{ token: string }>();
   const state = useOverlayState(params.token);
-  const chat = useTwitchChat(state?.twitchLogin ?? null);
+  const chat = useTwitchChat(state?.twitchLogin ?? null, params.token);
 
   if (!state) {
     return null;
-  }
-
-  if (!state.twitchLogin) {
-    return (
-      <OverlayShell>
-        <p className="text-[clamp(14px,3.6cqi,28px)] text-white/80">Підключи Twitch у кабінеті, щоб показати чат.</p>
-      </OverlayShell>
-    );
   }
 
   return (
@@ -27,7 +19,7 @@ export default function ChatOverlayPage() {
         messages={chat.messages}
         tone={state.overlayTone}
         accent={state.overlayAccent}
-        duration={state.overlayDuration}
+        duration={state.overlayChatDuration}
         onDone={chat.dismiss}
       />
     </OverlayShell>

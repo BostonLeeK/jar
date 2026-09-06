@@ -6,6 +6,7 @@ import { isOverlayStyle, isOverlayTone } from "@/lib/overlay";
 import { isPageThemeId } from "@/lib/themes";
 import { cleanSocialInput } from "@/lib/social";
 import { sanitizeCss, sanitizeHtml, TEMPLATE_LIMIT } from "@/lib/template";
+import { normalizeChatDuration } from "@/lib/chat";
 import { clamp, isEmail, isHexColor } from "@/lib/validate";
 import { NextResponse } from "next/server";
 
@@ -31,6 +32,7 @@ export async function PATCH(req: Request) {
     goalAmount?: number;
     minAmount?: number;
     overlayDuration?: number;
+    overlayChatDuration?: number;
     overlayTone?: string;
     overlayAccent?: string;
     alertStyle?: string;
@@ -131,6 +133,7 @@ export async function PATCH(req: Request) {
       overlayTone,
       overlayAccent,
       overlayDuration: clamp(Math.round(body.overlayDuration ?? user.overlayDuration), 3, 40),
+      overlayChatDuration: normalizeChatDuration(body.overlayChatDuration ?? user.overlayChatDuration),
       alertStyle,
       alertShowMessage: body.alertShowMessage ?? user.alertShowMessage,
       goalStyle,

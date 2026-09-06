@@ -84,13 +84,15 @@ export function WidgetPreviews({
         </Stage>
       </Card>
       <Card className="overflow-hidden">
-        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">Чат Twitch · 720×900</p>
+        <p className="border-b border-zinc-100 px-4 py-2 text-xs font-medium text-zinc-500">
+          Чат Twitch · 720×900 · {preview.overlayChatDuration}с
+        </p>
         <Stage backdrop={backdrop}>
           <ChatView
             messages={SAMPLE_CHAT}
             tone={preview.overlayTone}
             accent={preview.overlayAccent}
-            duration={preview.overlayDuration}
+            duration={preview.overlayChatDuration}
             preview
           />
         </Stage>

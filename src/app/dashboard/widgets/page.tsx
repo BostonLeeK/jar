@@ -35,6 +35,7 @@ export default async function WidgetsPage() {
         overlayTone={user.overlayTone}
         overlayAccent={user.overlayAccent}
         overlayDuration={user.overlayDuration}
+        overlayChatDuration={user.overlayChatDuration}
         alertStyle={user.alertStyle}
         alertShowMessage={user.alertShowMessage}
         goalStyle={user.goalStyle}

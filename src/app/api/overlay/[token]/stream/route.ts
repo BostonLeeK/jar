@@ -1,4 +1,4 @@
-import { onDonation } from "@/lib/events";
+import { onChat, onDonation } from "@/lib/events";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -19,7 +19,8 @@ export async function GET(
   const stream = new ReadableStream({
     start(controller) {
       let closed = false;
-      let off: () => void = () => undefined;
+      let offDonation: () => void = () => undefined;
+      let offChat: () => void = () => undefined;
       let ping: ReturnType<typeof setInterval> | undefined;
       const send = (payload: unknown) => {
         if (closed) {
@@ -36,7 +37,8 @@ export async function GET(
           return;
         }
         closed = true;
-        off();
+        offDonation();
+        offChat();
         if (ping) {
           clearInterval(ping);
         }
@@ -46,8 +48,11 @@ export async function GET(
           return;
         }
       };
-      off = onDonation(user.id, (donation) => {
+      offDonation = onDonation(user.id, (donation) => {
         send({ type: "donation", ...donation });
+      });
+      offChat = onChat(user.id, (message) => {
+        send({ type: "chat", ...message });
       });
       ping = setInterval(() => {
         send({ type: "ping" });
