@@ -1,3 +1,4 @@
+import { DailyChart } from "@/components/daily-chart";
 import { ClearTestDonations, DeleteTestDonation } from "@/components/test-donations";
 import { Card } from "@/components/ui";
 import { buildDailySeries, parsePeriod, periodSince } from "@/lib/analytics";
@@ -35,8 +36,10 @@ export default async function AnalyticsPage({
   const total = donations.reduce((sum, item) => sum + item.amount, 0);
   const average = donations.length ? Math.round(total / donations.length) : 0;
   const conversion = user.pageViews > 0 ? ((donations.length / user.pageViews) * 100).toFixed(1) : "0.0";
-  const series = buildDailySeries(range, donations.map((item) => item.createdAt));
-  const max = Math.max(...series.map((item) => item.value), 1);
+  const series = buildDailySeries(
+    range,
+    donations.map((item) => item.createdAt),
+  );
 
   return (
     <div className="space-y-6">
@@ -85,18 +88,12 @@ export default async function AnalyticsPage({
           <h2 className="text-sm font-medium">Донати по днях</h2>
           <p className="text-sm text-zinc-500">Середній чек {formatUah(average)}</p>
         </div>
-        <div className="flex h-40 items-end gap-1">
-          {series.map((item) => (
-            <div key={item.key} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-              <div
-                className="w-full rounded-t-md bg-zinc-900"
-                style={{ height: `${Math.max(6, (item.value / max) * 100)}%` }}
-                title={`${item.label}: ${item.value}`}
-              />
-              <span className="text-[10px] text-zinc-400">{item.label}</span>
-            </div>
-          ))}
-        </div>
+        <DailyChart
+          series={series.map((item) => ({
+            ...item,
+            title: `${item.label}: ${item.value}`,
+          }))}
+        />
       </Card>
 
       <Card className="p-5">
