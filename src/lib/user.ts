@@ -8,16 +8,74 @@ export function pageAvatar(user: { avatarUrl?: string | null; twitchAvatar?: str
   return user.avatarUrl || user.twitchAvatar || null;
 }
 
+function isUniqueConflict(error: unknown) {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
+
 export async function allocateSlug(name: string) {
-  let slug = slugify(name);
-  if (slug.length < 3) {
-    slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
+  const base = slugify(name);
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const slug =
+      attempt === 0 && base.length >= 3 ? base : `${base.slice(0, 24)}-${Math.random().toString(36).slice(2, 6)}`;
+    const taken = await prisma.user.findUnique({ where: { slug } });
+    if (!taken) {
+      return slug;
+    }
   }
-  const taken = await prisma.user.findUnique({ where: { slug } });
-  if (taken) {
-    slug = `${slug.slice(0, 24)}-${Math.random().toString(36).slice(2, 6)}`;
+  return `streamer-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+export async function upsertGoogleUser(profile: { id: string; email: string; name: string }) {
+  const byGoogle = await prisma.user.findUnique({ where: { googleId: profile.id } });
+  if (byGoogle) {
+    return byGoogle;
   }
-  return slug;
+
+  const byEmail = await prisma.user.findUnique({ where: { email: profile.email } });
+  if (byEmail) {
+    if (byEmail.googleId && byEmail.googleId !== profile.id) {
+      throw new Error("Цей email уже привʼязаний до іншого входу");
+    }
+    if (!byEmail.googleId) {
+      try {
+        return await prisma.user.update({
+          where: { id: byEmail.id },
+          data: { googleId: profile.id },
+        });
+      } catch (error) {
+        if (isUniqueConflict(error)) {
+          const existing = await prisma.user.findUnique({ where: { googleId: profile.id } });
+          if (existing) {
+            return existing;
+          }
+        }
+        throw error;
+      }
+    }
+    return byEmail;
+  }
+
+  try {
+    return await prisma.user.create({
+      data: {
+        email: profile.email,
+        name: profile.name.slice(0, 40) || "Streamer",
+        slug: await allocateSlug(profile.name),
+        googleId: profile.id,
+        pageTitle: profile.name.slice(0, 60),
+      },
+    });
+  } catch (error) {
+    if (isUniqueConflict(error)) {
+      const existing = await prisma.user.findFirst({
+        where: { OR: [{ googleId: profile.id }, { email: profile.email }] },
+      });
+      if (existing) {
+        return existing;
+      }
+    }
+    throw error;
+  }
 }
 
 export async function getCurrentUser() {

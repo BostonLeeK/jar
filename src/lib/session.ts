@@ -1,6 +1,7 @@
 import { SESSION_COOKIE } from "@/lib/constants";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import type { NextResponse } from "next/server";
 
 function secret() {
   const value = process.env.AUTH_SECRET;
@@ -10,21 +11,30 @@ function secret() {
   return new TextEncoder().encode(value);
 }
 
-export async function createSession(userId: string) {
-  const token = await new SignJWT({ sub: userId })
+const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  secure: process.env.NODE_ENV === "production",
+  path: "/",
+  maxAge: 60 * 60 * 24 * 30,
+};
+
+async function sessionToken(userId: string) {
+  return new SignJWT({ sub: userId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("30d")
     .sign(secret());
+}
 
+export async function createSession(userId: string, response?: NextResponse) {
+  const token = await sessionToken(userId);
+  if (response) {
+    response.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
+    return;
+  }
   const store = await cookies();
-  store.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  store.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
 }
 
 export async function clearSession() {

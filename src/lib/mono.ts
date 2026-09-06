@@ -55,8 +55,7 @@ export async function fetchClientInfo(token: string) {
   return (await res.json()) as MonoClientInfo;
 }
 
-export async function setMonoWebhook(token: string, webhookToken: string) {
-  const webHookUrl = `${getAppUrl()}/api/mono/webhook/${webhookToken}`;
+async function postMonoWebhook(token: string, webHookUrl: string) {
   const res = await fetch(`${BASE}/personal/webhook`, {
     method: "POST",
     headers: {
@@ -68,5 +67,14 @@ export async function setMonoWebhook(token: string, webhookToken: string) {
   if (!res.ok) {
     throw new Error(await readError(res));
   }
+}
+
+export async function setMonoWebhook(token: string, webhookToken: string) {
+  const webHookUrl = `${getAppUrl()}/api/mono/webhook/${webhookToken}`;
+  await postMonoWebhook(token, webHookUrl);
   return webHookUrl;
+}
+
+export async function clearMonoWebhook(token: string) {
+  await postMonoWebhook(token, "");
 }

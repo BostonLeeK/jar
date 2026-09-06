@@ -1,4 +1,4 @@
-import { mkdir, readdir, unlink, writeFile } from "fs/promises";
+import { mkdir, readdir, rm, unlink, writeFile } from "fs/promises";
 import path from "path";
 
 const DIR = path.join(process.cwd(), "public", "uploads", "alerts");
@@ -56,4 +56,8 @@ export async function removeAlertFile(userId: string, tierId: string, kind?: "gi
       .filter((name) => name.startsWith(prefix))
       .map((name) => unlink(path.join(dir, name)).catch(() => undefined)),
   );
+}
+
+export async function removeAlertUserFiles(userId: string) {
+  await rm(path.join(DIR, userId), { recursive: true, force: true }).catch(() => undefined);
 }

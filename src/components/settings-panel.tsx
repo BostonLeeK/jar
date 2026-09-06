@@ -15,7 +15,13 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
   const [passwordOk, setPasswordOk] = useState(false);
   const [pending, setPending] = useState(false);
   const [pageListed, setPageListed] = useState(user.pageListed);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteSlug, setDeleteSlug] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const donateUrl = `${appUrl}${donatePath(user.slug)}`;
+  const canDelete = deleteSlug.trim() === user.slug && (!user.hasPassword || deletePassword.length > 0);
 
   async function saveProfile(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,6 +79,30 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
     }
     setPasswordOk(true);
     event.currentTarget.reset();
+  }
+
+  async function deleteAccount() {
+    if (!canDelete || deleting) {
+      return;
+    }
+    setDeleting(true);
+    setDeleteError(null);
+    const res = await fetch("/api/settings/account", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slug: deleteSlug,
+        password: deletePassword,
+      }),
+    });
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    if (!res.ok) {
+      setDeleting(false);
+      setDeleteError(data.error || "Не вдалося видалити акаунт");
+      return;
+    }
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -145,6 +175,60 @@ export function SettingsPanel({ user, appUrl }: { user: SafeUser; appUrl: string
             {user.hasPassword ? "Змінити пароль" : "Встановити пароль"}
           </Button>
         </form>
+      </Card>
+
+      <Card className="border-red-100 p-5 lg:col-span-2">
+        <h2 className="text-sm font-medium text-red-600">Видалити акаунт</h2>
+        <p className="mt-1 text-sm text-zinc-500">
+          Сторінка /d/{user.slug}, донати, віджети, файли і підключення зникнуть без відновлення.
+        </p>
+        {deleteOpen ? (
+          <div className="mt-4 max-w-md space-y-3">
+            <div>
+              <Label htmlFor="delete-slug">Введи slug {user.slug}</Label>
+              <Input
+                id="delete-slug"
+                value={deleteSlug}
+                onChange={(event) => setDeleteSlug(event.target.value)}
+                autoComplete="off"
+              />
+            </div>
+            {user.hasPassword ? (
+              <div>
+                <Label htmlFor="delete-password">Поточний пароль</Label>
+                <Input
+                  id="delete-password"
+                  type="password"
+                  value={deletePassword}
+                  onChange={(event) => setDeletePassword(event.target.value)}
+                />
+              </div>
+            ) : null}
+            <FieldError>{deleteError}</FieldError>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="danger" disabled={!canDelete || deleting} onClick={deleteAccount}>
+                {deleting ? "Видаляю…" : "Видалити назавжди"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={deleting}
+                onClick={() => {
+                  setDeleteOpen(false);
+                  setDeleteSlug("");
+                  setDeletePassword("");
+                  setDeleteError(null);
+                }}
+              >
+                Скасувати
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button type="button" variant="danger" className="mt-4" onClick={() => setDeleteOpen(true)}>
+            Видалити акаунт
+          </Button>
+        )}
       </Card>
     </div>
   );
